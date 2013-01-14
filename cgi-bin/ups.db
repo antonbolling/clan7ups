@@ -22,7 +22,7 @@ CREATE TABLE bid_eq (
   first_bid_time datetime default NULL,
   add_time datetime default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 CREATE TABLE incoming_eq (
   id int(11) NOT NULL auto_increment,
@@ -31,11 +31,11 @@ CREATE TABLE incoming_eq (
   value int(11) default '0',
   type enum('bid','store') default 'store',
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 CREATE TABLE log (
   id int(11) NOT NULL auto_increment,
-  time timestamp(14) NOT NULL,
+  time timestamp NOT NULL,
   user int(11) default NULL,
   action varchar(20) default NULL,
   cdata1 varchar(20) default NULL,
@@ -44,21 +44,21 @@ CREATE TABLE log (
   idata2 int(11) default NULL,
   bigdata blob,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 CREATE TABLE outgoing_eq (
   id int(11) NOT NULL auto_increment,
   descr blob,
   bidder varchar(20) default NULL,
-  add_stamp timestamp(14) NOT NULL,
+  add_stamp timestamp NOT NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 CREATE TABLE picked_eq (
   id int(11) default NULL,
   bidder varchar(20) default NULL,
   descr blob
-) TYPE=MyISAM;
+);
 
 CREATE TABLE runs (
   id int(11) NOT NULL auto_increment,
@@ -71,23 +71,29 @@ CREATE TABLE runs (
   mod_stamp datetime default NULL,
   comments blob,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 CREATE TABLE user_points_ (
   zone char(20) default NULL,
   points int(11) default NULL
-) TYPE=MyISAM;
+);
 
 CREATE TABLE users (
   id int(11) NOT NULL auto_increment,
   name varchar(20) default NULL,
   aliases text,
-  pass varchar(16) default NULL,
+  pass varchar(128) default NULL,
   access enum('user','gate','admin') NOT NULL default 'user',
   magic int(11) default NULL,
   session_stamp datetime default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
+
+--
+-- Create a default admin account
+--
+
+INSERT INTO users (name,pass,access) VALUES ('admin',PASSWORD('pw'),'admin');
 
 --
 -- Table structure for table `zone_points_alps`
@@ -98,7 +104,7 @@ CREATE TABLE zone_points_alps (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_alps`
@@ -115,7 +121,7 @@ CREATE TABLE zone_points_bloodstone (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_bloodstone`
@@ -139,7 +145,7 @@ CREATE TABLE zone_points_coliseum (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_coliseum`
@@ -156,7 +162,7 @@ CREATE TABLE zone_points_condemned (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_condemned`
@@ -173,7 +179,7 @@ CREATE TABLE zone_points_demonforge (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_demonforge`
@@ -193,7 +199,7 @@ CREATE TABLE zone_points_den (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_den`
@@ -211,7 +217,7 @@ CREATE TABLE zone_points_eldricks (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_eldricks`
@@ -228,7 +234,7 @@ CREATE TABLE zone_points_elysium (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_elysium`
@@ -246,7 +252,7 @@ CREATE TABLE zone_points_estate (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_estate`
@@ -264,7 +270,7 @@ CREATE TABLE zone_points_kalata (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_kalata`
@@ -281,7 +287,7 @@ CREATE TABLE zone_points_kukdheuda (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_kukdheuda`
@@ -298,7 +304,7 @@ CREATE TABLE zone_points_lyryanoth (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_lyryanoth`
@@ -315,7 +321,7 @@ CREATE TABLE zone_points_reclasta (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_reclasta`
@@ -332,7 +338,7 @@ CREATE TABLE zone_points_scales (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_scales`
@@ -350,7 +356,7 @@ CREATE TABLE zone_points_sevoseth (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_sevoseth`
@@ -367,7 +373,7 @@ CREATE TABLE zone_points_tomb (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_tomb`
@@ -387,7 +393,7 @@ CREATE TABLE zone_points_verigaard (
   day_name char(20) default NULL,
   points int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zone_points_verigaard`
@@ -405,7 +411,7 @@ CREATE TABLE zones (
   percent int(11) default NULL,
   num_days int(11) default NULL,
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
 --
 -- Dumping data for table `zones`

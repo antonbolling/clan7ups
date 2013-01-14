@@ -26,7 +26,7 @@ sub modify_run_gui {
 
   print <<EOT;
   <h3>Modifying run $runid, zone $zone_name day $day. Current status is <b>$status</b></h3>
-  <form name=askday method=post action="/fate-cgi/ups.pl">
+  <form name=askday method=post action="/cgi-bin/ups.pl">
   $session_info
   <input type="hidden" name="view_time" value="$view_time">
   <input type="hidden" name="runid" value="$runid">

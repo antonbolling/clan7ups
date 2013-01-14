@@ -18,7 +18,7 @@ sub browser_gui {
   print <<EOT;
     <hr>
     <h3>Search the equipment database</h3>
-    <form name=grep method=post action=/fate-cgi/ups.pl>
+    <form name=grep method=post action=/cgi-bin/ups.pl>
     $session_info
     <input type="hidden" name="action" value="browse">
 

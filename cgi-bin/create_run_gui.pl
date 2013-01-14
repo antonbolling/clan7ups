@@ -18,7 +18,7 @@ sub create_run_gui {
 
   print <<EOT;
   <h3>Submit a new run</h3>
-    <form method="post" name="submitrun" action="/fate-cgi/ups.pl">
+    <form method="post" name="submitrun" action="/cgi-bin/ups.pl">
     $session_info
     <input type="hidden" name="action" value="create_run">
     <input type="hidden" name="leader" value="$uid">

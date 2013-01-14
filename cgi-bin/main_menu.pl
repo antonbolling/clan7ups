@@ -81,7 +81,7 @@ EOT
   display_points($dbh, $q, $view_time);
 
   print <<EOT;
-  <form name=return method=post action="/fate-cgi/ups.pl">
+  <form name=return method=post action="/cgi-bin/ups.pl">
   $session_info
   <input type="hidden" name="action" value="main_menu">
   <input type="submit" value="Refresh this page">
@@ -103,7 +103,7 @@ sub list_runs_user {
       print <<EOT;
 <hr>
 <h3>User: you have $records unapproved or flagged runs.</h3>
-<form name="viewrun" method="post" action="/fate-cgi/ups.pl">
+<form name="viewrun" method="post" action="/cgi-bin/ups.pl">
 <input type="hidden" name="action" value="modify_run_gui">
 $session_info
 <table>
@@ -166,7 +166,7 @@ sub list_runs_gate {
     print <<EOT;
 <hr>
 <h3>Gatekeeper: $records runs waiting to be approved</h3>
-<form name="approverun" method="post" action="/fate-cgi/ups.pl">
+<form name="approverun" method="post" action="/cgi-bin/ups.pl">
 <input type="hidden" name="action" value="modify_run_gui">
 $session_info
 <table>
@@ -253,7 +253,7 @@ sub list_pickable_eq {
   if ($number_pickable_items > 0) {
     print <<EOT;
     <h3>Allocate points for your <bold>$number_pickable_items</bold> picks</h3>
-    <form method=post action=/fate-cgi/pickitem.pl>
+    <form method=post action=/cgi-bin/pickitem.pl>
     <table>
       <tr><td></td><td>ID</td><td>Description</td><td>Days</td><td>Bid</td></tr>
 
@@ -294,7 +294,7 @@ sub select_action {
   my $session_info = get_session_info($dbh, $q, $view_time);
 
   print <<EOT;
-<form name=action method="post" action="/fate-cgi/ups.pl">
+<form name=action method="post" action="/cgi-bin/ups.pl">
 $session_info
 <select name="action">
 <option value="create_run_gui">Submit a run
@@ -412,7 +412,7 @@ EOT
       print <<EOT;
       <h4> $num_pickable items ready to pick </h4>
 
-      <form name="pick_bid" method="post" action="/fate-cgi/ups.pl">
+      <form name="pick_bid" method="post" action="/cgi-bin/ups.pl">
       <input type="hidden" name="action" value="allocate_pick_gui">
       $session_info
 

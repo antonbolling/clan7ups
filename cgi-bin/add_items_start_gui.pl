@@ -19,7 +19,7 @@ sub add_items_start_gui {
 
   print <<EOT;
   <h3>Add eq to the database</h3>
-    <form method="post" name="add_eq" action="/fate-cgi/ups.pl">
+    <form method="post" name="add_eq" action="/cgi-bin/ups.pl">
     $session_info
     <input type="hidden" name="action" value="add_items_start">
 

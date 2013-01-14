@@ -123,7 +123,7 @@ EOT
   }
   else {
     print <<EOT;
-    <form name="picks" method="post" action="/fate-cgi/ups.pl">
+    <form name="picks" method="post" action="/cgi-bin/ups.pl">
     <input type="hidden" name="action" value="bid_item">
     <input type="hidden" name="bid_item" value="$bid_item_num">
     $session_info

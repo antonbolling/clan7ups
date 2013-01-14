@@ -46,7 +46,7 @@ sub perform_picks_gui {
   <h3>Perform picks</h3>
   <h4>$matches picks remaining to be sent out</h4>
 
-  <form name="picks" method="post" action="/fate-cgi/ups.pl">
+  <form name="picks" method="post" action="/cgi-bin/ups.pl">
   <input type="hidden" name="action" value="perform_picks">
   $session_info
   <table>

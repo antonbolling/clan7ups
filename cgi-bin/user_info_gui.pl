@@ -22,7 +22,7 @@ sub user_info_gui {
 
   print <<EOT;
   <h4>Change password for user $login</h4>
-  <form name="changepass" action="/fate-cgi/ups.pl">
+  <form name="changepass" action="/cgi-bin/ups.pl">
   <input type="hidden" name="action" value="change_password">
   $session_info
   <table>

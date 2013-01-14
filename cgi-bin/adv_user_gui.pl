@@ -15,7 +15,7 @@ sub adv_user_gui {
 
   print <<EOT;
   <h3>Advanced User Management</h3>
-  <form method="post" name="advuser" action="/fate-cgi/ups.pl">
+  <form method="post" name="advuser" action="/cgi-bin/ups.pl">
     $session_info
     <input type="hidden" name="action" value="adv_user">
     <table>
@@ -38,7 +38,7 @@ EOT
 
   #print <<EOT;
   #<h3>Account Browser</h3>
-  #<form method="post" name="account_browser" action="/fate-cgi/ups.pl">
+  #<form method="post" name="account_browser" action="/cgi-bin/ups.pl">
   #  $session_info
   #  <input type="hidden" name="action" value="account_browser">
   #  <select name="user">
@@ -89,7 +89,7 @@ EOT
   print <<EOT;
   <h4>Change Access Level</h4>
   Current Access Level for $username: $access 
-  <form method="post" name="changeaccess" action="/fate-cgi/ups.pl">
+  <form method="post" name="changeaccess" action="/cgi-bin/ups.pl">
     <input type="hidden" name="action" value="adv_change_access">
     <input type="hidden" name="user" value=$username>
     <input type="hidden" name="userid" value=$userid>
@@ -103,7 +103,7 @@ EOT
   </form>
 
   <h4>Change password</h4>
-  <form method="post" name="changepass" action="/fate-cgi/ups.pl">
+  <form method="post" name="changepass" action="/cgi-bin/ups.pl">
     <input type="hidden" name="action" value="adv_change_password">
     <input type="hidden" name="user" value=$username>
     $session_info
@@ -177,7 +177,7 @@ EOT
     my $session_info = get_session_info($dbh, $q, $view_time);
     
     print <<EOT;
-    <form method="post" name="xfer_pts" action="/fate-cgi/ups.pl">
+    <form method="post" name="xfer_pts" action="/cgi-bin/ups.pl">
       $session_info
       <input type="hidden" name="user" value="$username">
       <input type="hidden" name="action" value="adv_xfer_pts">
@@ -238,7 +238,7 @@ sub return_adv_user {
   my $session_info = get_session_info($dbh, $q, $view_time);
 
   print <<EOT;
-  <form name=return method=post action="/fate-cgi/ups.pl">
+  <form name=return method=post action="/cgi-bin/ups.pl">
   $session_info
   <input type="hidden" name="action" value="adv_user_gui">
   <input type="submit" value="Back">

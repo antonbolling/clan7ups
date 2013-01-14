@@ -95,7 +95,7 @@ EOT
     # We have $entries matches to view.
     print <<EOT;
 
-<form method="post" name="bid_eq" action="/fate-cgi/ups.pl">
+<form method="post" name="bid_eq" action="/cgi-bin/ups.pl">
 $session_info
 <input type="hidden" name="action" value="revalue_bid">
 
@@ -194,7 +194,7 @@ EOT
   if ($num_claimable_items) {
     # We have $num_claimable_items matches to view.
     print <<EOT;
-<form method="post" name="buy_eq" action="/fate-cgi/ups.pl">
+<form method="post" name="buy_eq" action="/cgi-bin/ups.pl">
  $session_info
 <input type="hidden" name="action" value="revalue_store">
 

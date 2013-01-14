@@ -98,7 +98,7 @@ sub browser {
 <td>
   <table border=0 cellpadding=3 cellspacing=1 width='100%'>
 
-  <form method="post" name="bid_eq" action="/fate-cgi/ups.pl">
+  <form method="post" name="bid_eq" action="/cgi-bin/ups.pl">
   $session_info
   <input type="hidden" name="action" value="bid_item_gui">
 

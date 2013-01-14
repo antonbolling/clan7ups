@@ -97,7 +97,7 @@ EOT
   <p> I will automatically deduct the required <b>$min_alloc</b> points from $zone. </p>
   <p> Tell me where to get the remaining <b>$remaining_alloc</b> points. </p>
 
-  <form name="allocate_pick" method=post action="/fate-cgi/ups.pl">
+  <form name="allocate_pick" method=post action="/cgi-bin/ups.pl">
   $session_info
   <input type="hidden" name="action" value="allocate_pick">
   <input type="hidden" name="eqid" value="$eqid">

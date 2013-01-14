@@ -32,7 +32,7 @@ sub pick_day_gui {
 
   # Now we have day information for this zone, print it.
   print <<EOT;
-  <form name="pickday" method="post" action="/fate-cgi/ups.pl">
+  <form name="pickday" method="post" action="/cgi-bin/ups.pl">
   <input type="hidden" name="action" value="pick_day">
   <input type="hidden" name="runid" value="$runid">
   $session_info

@@ -22,7 +22,7 @@ sub mod_create_zone_gui {
 
   print <<EOT;
   <h3>View/modify zone information</h3>
-    <form method="post" name="zmod" action="/fate-cgi/ups.pl">
+    <form method="post" name="zmod" action="/cgi-bin/ups.pl">
     $session_info
     <input type="hidden" name="action" value="modify_zone_gui">
     <select name="zoneid">
@@ -47,7 +47,7 @@ EOT
 
   <hr>
   <h3>Add a zone</h3>
-  <form name="addzone" action="/fate-cgi/ups.pl">
+  <form name="addzone" action="/cgi-bin/ups.pl">
     $session_info
     <input type="hidden" name="action" value="create_zone">
     <table>

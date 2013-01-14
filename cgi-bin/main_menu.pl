@@ -307,8 +307,8 @@ EOT
   if ($access eq 'admin' or $access eq 'gate') {
     print <<EOT;
 <option value="perform_picks_gui">Perform picks
-<option value="obs_eq_gui">Remove old equipment
-<option value="revalue_gui">Revalue equipment entries
+<option value="obs_eq_gui">Remove old equipment - BROKEN
+<option value="revalue_gui">Revalue equipment entries - BROKEN
 EOT
   }
 
@@ -316,7 +316,7 @@ EOT
     print <<EOT;
 <option value="mod_create_zone_gui">Modify zone info
 <option value="adv_user_gui">Advanced user management
-<option value="add_items_start_gui">Transfer new equipment to the system
+<option value="add_items_start_gui">Transfer new equipment to the system - BROKEN
 EOT
   }
 

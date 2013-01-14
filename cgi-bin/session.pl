@@ -120,7 +120,7 @@ sub session_expired {
 
   <p> Sorry for the inconvenience, but this system keeps malicious
   users from hijacking your sessions and messing up your info. Please
-  <a href="http://www.kindredups.com/index.html">start over</a>.</p>
+  <a href="/">start over</a>.</p>
 
 EOT
 }

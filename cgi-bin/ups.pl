@@ -9,6 +9,8 @@ use CGI;
 use DBI;
 
 require "styles.pl";
+require "session.pl";
+require "db.pl";
 
 # This script:
 # - Attempts to connect to the database.
@@ -18,10 +20,7 @@ require "styles.pl";
 # - Examines 'action' param, loads the appropriate file,
 #   executes the appropriate function.
 
-require "session.pl";
-
-my $dbh = DBI->connect("DBI:mysql:database=ups_db;host=localhost",
-		    "mysqluser", "mysqltool");
+my $dbh = get_db();
 
 my $q = new CGI;
 print $q->header;

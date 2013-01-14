@@ -12,6 +12,7 @@ require "session.pl";
 require "main_menu.pl";
 require "cook.pl";
 require "styles.pl";
+require "db.pl";
 
 # Log into the database,
 # Retrieve cgi buffer,
@@ -19,17 +20,13 @@ require "styles.pl";
 # Start a new session,
 # Jump to the main menu.
 
-my $dbh = DBI->connect("DBI:mysql:database=ups_db;host=localhost",
-		    "mysqluser", "mysqltool") or die("Can't connect to database: $!");
+my $dbh = get_db();
 
 my $q = new CGI;
 print $q->header;
 
-#For testing purposes, comment out the longer $login/$pass lines and uncomment the shorter ones.
 my $login = lc cook_word($q->param('login'));
 my $pass = cook_word($q->param('pass'));
-#my $login = "evangelion";
-#my $pass = "nighthawk";
 
 print <<EOT;
 <head><title>Universal Point System</title>

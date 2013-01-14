@@ -48,9 +48,9 @@ EOT
 
     <tr><td valign=top>Run Type</td>
         <td><p><input type="radio" name="runtype" value="clan" checked>
-            Clan run (clan keys, clan treasure. extra points to leader)</p>
-            <p><input type="radio" name="runtype" value="self">
-            Self owned (own keys, keep treasure. no extra points)</p></td>
+            Clan run (send eq to ups storage char)</p>
+<!--            <p><input type="radio" name="runtype" value="self">
+            Self owned (own keys, keep treasure. no extra points)</p></td> -->
     </tr>
 
     <tr><td valign=top>Runners</td>
@@ -76,18 +76,7 @@ EOT
   <tr><td>Zone</td><td>Select which zone you ran.</td></tr>
 
   <tr><td valign=top>Run type</td>
-      <td><p>When you run a zone you can choose whether or not to use the clan keychar. Either way
-             the leader gets some form of extra compensation for leading the zone.</p>
-          <p><b>Clan run</b> - You use the clan's keychar for this run, and get a 25% point bonus
-             over the default award for this zone. However, you must trans cash from zone treasure
-             to your clan account. Gatekeepers will check that you do this.</p>
-          <p><b>Self owned run</b> - You use your own keys, and keep day keys after completing the
-             run. You also keep any cash from zone treasure. However, you opt not to receive the 25%
-             point bonus. </p>
-          <p>If you grabbed keys off your clan's keychar for the run, you can't submit as a self-owned run.
-             If you used your own keys for a run, you can't submit as a clan run.
-             These options are meant to compensate clan and runner fairly, and allowing people to switch
-             midrun would open the door to all kinds of abuse. Don't even ask. </p>
+          <p><b>Clan run</b> - EQ must be sent to ups storage char. Gatekeepers will check that you do this.</p>
       </td></tr>
 
   <tr><td valign=top>Runners</td>

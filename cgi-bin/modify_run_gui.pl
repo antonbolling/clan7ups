@@ -16,9 +16,9 @@ sub modify_run_gui {
 
   my $session_info = get_session_info($dbh, $q, $view_time);
 
-  my $sth = $dbh->prepare("select zone, add_stamp, day from runs where id=$runid");
+  my $sth = $dbh->prepare("select users.name, zone, add_stamp, day from users, runs where runs.id=$runid and users.id = runs.leader");
   $sth->execute;
-  my ($zone_name, $runtime, $day) = $sth->fetchrow_array;
+  my ($run_leader, $zone_name, $runtime, $day) = $sth->fetchrow_array;
 
   $sth = $dbh->prepare("select status from runs where id='$runid'");
   $sth->execute;
@@ -117,8 +117,10 @@ EOT
   <h4>Add items</h4>
   <textarea name="eqlist" rows=3 cols=120></textarea>
   <hr>
+ <h4>Run leader: $run_leader</h4>
 EOT
 
+ 
 
   $sth = $dbh->prepare("select runner, points from run_points_$runid");
   $sth->execute;

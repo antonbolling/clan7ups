@@ -143,7 +143,7 @@ EOT
     if ($run_type eq 'self') {
       $leader_award = $default_leader_award;
     } elsif ($run_type eq 'clan') {
-      $leader_award = int ($default_leader_award * 5 / 4);
+      $leader_award = $default_leader_award; # 2013/1 - disable leader points bonus - int ($default_leader_award * 5 / 4);
     }
   } else {
     print "<p>Scales run, not awarding leader bonus</p>";

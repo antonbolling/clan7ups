@@ -76,7 +76,7 @@ EOT
   <tr><td>Zone</td><td>Select which zone you ran.</td></tr>
 
   <tr><td valign=top>Run type</td>
-          <p><b>Clan run</b> - EQ must be sent to ups storage char. Gatekeepers will check that you do this.</p>
+          <td><p><b>Clan run</b> - EQ must be sent to ups storage char. Gatekeepers will check that you do this.</p>
       </td></tr>
 
   <tr><td valign=top>Runners</td>

@@ -84,7 +84,7 @@ sub invalid_login {
   <p>You entered an invalid username/password pair.</p>
   <p>If you haven't had your account password set, or if this problem continues,
      speak to an administrator. </p>
-  <p><A HREF="http://kindredups.com">Back to the top</a></p>
+  <p><A HREF="/">Back to the top</a></p>
 EOT
 
   print $q->end_html;

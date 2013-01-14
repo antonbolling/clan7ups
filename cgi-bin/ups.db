@@ -1,8 +1,9 @@
--- MySQL dump 9.10
---
--- Host: localhost    Database: ups_db
--- ------------------------------------------------------
--- Server version	4.0.18
+
+-- Medievia UPS MySQL database Schema.
+-- Tested on MySQL Server 5.5
+
+-- A default administrator account is created, username "admin", password "pw".
+-- This admin account should have the password changed asap.
 
 --
 -- Table structure for table `bid_eq`

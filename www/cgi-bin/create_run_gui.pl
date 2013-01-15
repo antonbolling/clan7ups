@@ -54,10 +54,10 @@ EOT
     </tr>
 
     <tr><td valign=top>Runners</td>
-        <td><textarea name="runners" rows=3 cols=120></textarea></td></tr>
+        <td><textarea name="runners" rows=6 cols=120></textarea></td></tr>
 
     <tr><td valign=top>Equipment</td>
-        <td><textarea name="eqlist" rows=10 cols=120></textarea></td></tr>
+        <td><textarea name="eqlist" rows=15 cols=120></textarea></td></tr>
 
     <tr><td valign=top>Comments</td>
         <td><textarea name="comments" rows=3 cols=120></textarea></td></tr>

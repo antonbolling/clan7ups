@@ -28,15 +28,13 @@ sub approve_run {
   $sth->execute;
   my ($zone_name, $leader, $run_type, $run_day) = $sth->fetchrow_array;
 
-  #First make sure the run leader isnt approving his own run
-  #$sth = $dbh->prepare("select id from users where name=$leader");
-  #$sth->execute;
-  #my $leaderid = $sth->fetchrow_array;
+  my $access = get_access($dbh, $q, $view_time);
 
   print "<p>Leader ID: $leader, Admin ID: $adminid</p>";
 
-  if ($leader eq $adminid) {
-    print "<p> You cannot approve your own run!</p>\n";
+  if ($leader eq $adminid && $access ne 'admin') {
+    print "<p> You cannot approve your own run unless your have 'admin' permissions!</p>\n";
+		main_menu($dbh, $q, $view_time);
     return 1;
   }
 

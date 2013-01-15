@@ -21,6 +21,7 @@ Fork of old Fate Universal Points System.  This is an old perl website that's pr
 * 'Revalue equipment entries' is a BROKEN admin feature - there's no way to adjust eq min bids after run is approved
 * 'Transfer new equipment to this system' is a BROKEN admin feature - there's no way to bulk import eq without submitting it as a run
 * 'EQ Store' feature is missing / broken, which allowed certain items to be outright purchasable instead of taking bids
+* Fate UPS bestowed 25% bonus points to the run leader. This has been removed (zero bonus points to run leader)
 
 ## Upcoming
 * UPS comes with a list of top eq zones circa 2004. Needs updating. E.g. there's no Vondarkla
@@ -28,7 +29,6 @@ Fork of old Fate Universal Points System.  This is an old perl website that's pr
 * Remove debug spam at top of each page once it's running smoothly
 * Configurable auction length - the auction length of three days is hardcoded in many places
 * Make UPS website pretty
-* Fate UPS bestowed 25% bonus points to the run leader. This should be configurable but has currently been removed (zero bonus points to run leader)
 
 ## Credits
 Thanks to Fate for this awesome UPS!  Original author unknown, possibly Evangelion.

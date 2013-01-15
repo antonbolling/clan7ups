@@ -117,7 +117,7 @@ EOT
   <h4>Add items</h4>
   <textarea name="eqlist" rows=3 cols=120></textarea>
   <hr>
- <h4>Run leader: $run_leader</h4>
+ <h4>Run leader: $run_leader (must still appear in list below to receive points)</h4>
 EOT
 
  

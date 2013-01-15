@@ -71,9 +71,6 @@ sub create_run {
     $dbh->do("insert into run_points_$runid values ('$runner',0)");
   }
 
-  #Delete the leader from runpointdata if it's in there.
-  $dbh->do("delete from run_points_$runid where runner='$leader_name'");
-
   #Handle the eq list.
   my @eqlist = split(/\r\n/, $eqlist);
   my $count = 0;

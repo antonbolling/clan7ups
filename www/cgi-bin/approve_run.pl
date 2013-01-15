@@ -1,8 +1,3 @@
-#08/22/03 - JM - Leaders can no longer approve their own runs, for security reasons
-#08/24/03 - JM - Changed some prepare/execute statements to $dbh->do() for speed
-#                Approved runs are now set as 'approved' and approval is logged
-#11/11/03 - JM - Removed reference to deprecated store system
-#11/22/03 - JM - Leader no longer gets bonus for a scales run
 
 use warnings;
 use strict;
@@ -27,7 +22,6 @@ sub approve_run {
   # 1) Move equipment entries into the main eq database.
   # 2) Create any users that don't exist in the main database.
   # 3) Award points to all users in points field of this run.
-  # 4) Handle leader award based on run_type value.
 
   # 1) Move equipment entries into the main eq database.
   my $sth = $dbh->prepare("select zone,leader,type,day from runs where id=$runid");
@@ -125,52 +119,6 @@ EOT
 
     $dbh->do("update user_points_$runner set points=points + $award where zone='$zone_name'");
   }
-
-  #Done with runners; Decide what to do with the leader.
-  $sth = $dbh->prepare("select name from users where id=$leader");
-  $sth->execute;
-  my ($leader_name) = $sth->fetchrow_array;
-
-  # Figure default point award for the day we ran.
-  $sth = $dbh->prepare("select points from zone_points_$zone_name where id=$run_day");
-  $sth->execute;
-  my ($default_leader_award) = $sth->fetchrow_array;
-
-  my $leader_award;
-
-  #Don't assign extra leader award if this was a scales run
-  if ($zone_name ne 'scales') {
-    if ($run_type eq 'self') {
-      $leader_award = $default_leader_award;
-    } elsif ($run_type eq 'clan') {
-      $leader_award = $default_leader_award; # 2013/1 - disable leader points bonus - int ($default_leader_award * 5 / 4);
-    }
-  } else {
-    print "<p>Scales run, not awarding leader bonus</p>";
-    $leader_award = $default_leader_award;
-  }
-
-print <<EOT;
-  <p> Default point award for day $run_day of zone $zone_name is $default_leader_award.
-      Run type is $run_type so actual leader award is $leader_award. Leader name is
-      $leader_name</p>
-EOT
-  # Update the leader's point data.
-  $sth = $dbh->prepare("select points from user_points_$leader_name where zone='$zone_name'");
-  $sth->execute;
-  my $entry_exists = $sth->rows;
-
-  # If it doesn't exist, create.
-  if (!$entry_exists) {
-    $dbh->do("insert into user_points_$leader_name values ('$zone_name',0)");
-  }
-
-  # Add leader's point award.
-  $dbh->do("update user_points_$leader_name set points = points + $leader_award where zone='$zone_name'");
-
-  #Remove the run from runs table;
-  #$dbh->do("delete from runs where id='$runid'");
-  #$dbh->do("drop table run_points_$runid");
 
   #Set run status to approved
   $dbh->do("update runs set status='approved' where id=$runid");

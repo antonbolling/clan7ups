@@ -1,10 +1,3 @@
-#08/10/03 - JM - Added missing execute where the system was supposed to remove
-#                the leader from his own run.  This fixes a bug where it was possible
-#                to re-add yourself to your own run and gain extra points.
-#08/24/03 - JM - Changed some prepare/execute statements to $dbh->do() for speed
-#                All actions in modify_run are now logged
-#11/10/03 - JM - All eq now sent to bid, regardless of selection on
-#                Modify Run panel
 
 use warnings;
 use strict;
@@ -16,6 +9,7 @@ require "session.pl";
 require "main_menu.pl";
 require "ups_util.pl";
 require "cook.pl";
+require "pick_day.pl";
 
 sub modify_run {
   my ($dbh, $q, $view_time) = @_;
@@ -120,7 +114,9 @@ EOT
   # a) Delete users in 'delete_runner'.
   my @delete_runners = $q->param('delete_runner');
 
+  my $runners_were_deleted = 0;
   if (scalar(@delete_runners)) {
+    $runners_were_deleted = 1;
     @delete_runners = map { cook_word($_) } @delete_runners;
     my @quoted_delete_runners = map { "'$_'" } @delete_runners;
     my $delete_runner_string = join ',', @quoted_delete_runners;
@@ -139,73 +135,74 @@ EOT
     #print "<p>Database reports $num_deleted runners deleted</p>\n";
   }
 
-  # ADD RUNNERS
-  # a) What is default point award for this zone?
-  $sth = $dbh->prepare("select points from zone_points_$zone_name where id=$day");
-  $sth->execute;
-  my ($default_point_award) = $sth->fetchrow_array;
-
-  print "<p> Default point award: $default_point_award </p>\n";
-  # b) Add runners in 'runners', set to current default points.
+  # ADD RUNNERS give them 0 points and it will be updated with new split value below
   my $runners = cook_string($q->param('runners'));
   my @runlist = $runners =~ /(\w+)/g;
   @runlist = map { lc $_ } @runlist;
 
+  my $runners_were_added = 0;
+
   foreach (@runlist) {
+			$runners_were_added = 1;
     my $runner = cook_word($_);
     print "<p>Adding runner $runner to database</p>\n";
-    $dbh->do("insert into run_points_$runid values ('$runner',$default_point_award)");
+    $dbh->do("insert into run_points_$runid values ('$runner',0)");
     #Log this
-    $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin added $runner to run $runid with $default_point_award points')");
+    $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin added $runner to run $runid with 0 points')");
   }
 
   printf "<p>Done adding runners</p>\n";
 
-  #Any 'points_$runner' left with entry for $runner in db gets installed in
-  #run_point_data.
-  $sth = $dbh->prepare("select runner from run_points_$runid");
-  $sth->execute;
+  # If runners were added or deleted, update all runners' points values with the new split value (based new on # of runners)
 
-  if ($sth->rows) {
-    my $sta;
-    while (my ($runner) = $sth->fetchrow_array) {
-      print "Checking $runner<br>";
-      my $point_control = cook_int($q->param("points_$runner"));
-      if ($point_control) {
-        # We have input for this user.
-        #Only update point values if the new value is different from the current pts
-        #that the user has on this run
+  if ($runners_were_deleted || $runners_were_added) {
+    my $points_per_runner = points_per_runner($dbh,$runid);
 
-        #print "select points from run_points_$runid where runner='$runner'<br";
-        $sta = $dbh->prepare("select points from run_points_$runid where runner='$runner'");
-        $sta->execute;
-        my $current_pts = $sta->fetchrow_array;
+		$sth = $dbh->prepare("update run_points_$runid set points = $points_per_runner");
+		$sth->execute;
+  
+		print "<p>WARNING: reset all runners' points to the new split value of $points_per_runner</p>";
+		print "<p>WARNING: ignoring any custom modifications to runner points, because runners were added or deleted. Make your changes again.</p>";
+	} else {
 
-        if ($point_control != $current_pts) {
-          $dbh->do("update run_points_$runid set points=$point_control where runner='$runner'");
-          print " Updating point value for $runner: $point_control<br>";
-          $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin changed points for $runner to $point_control (from $current_pts) on run #$runid')");
-        }
-      } else {
-        print " Not modifying points for $runner<br>";
-      }
-    }
+    # This "else" block, which handles manual points modifications, is only done when runners aren't added or deleted. This is because all points are reset when runners are added/deleted.
 
-    print "Finished checking runners<br>";
-    $sta->finish;
+    #Any 'points_$runner' left with entry for $runner in db gets installed in
+   	#run_point_data.
+		$sth = $dbh->prepare("select runner from run_points_$runid");
+		$sth->execute;
+
+		if ($sth->rows) {
+				my $sta;
+				while (my ($runner) = $sth->fetchrow_array) {
+						print "Checking $runner<br>";
+						my $point_control = cook_int($q->param("points_$runner"));
+						if ($point_control) {
+								# We have input for this user.
+								#Only update point values if the new value is different from the current pts
+								#that the user has on this run
+								
+								#print "select points from run_points_$runid where runner='$runner'<br";
+								$sta = $dbh->prepare("select points from run_points_$runid where runner='$runner'");
+								$sta->execute;
+								my $current_pts = $sta->fetchrow_array;
+								
+								if ($point_control != $current_pts) {
+										$dbh->do("update run_points_$runid set points=$point_control where runner='$runner'");
+										print " Updating point value for $runner: $point_control<br>";
+										$dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin changed points for $runner to $point_control (from $current_pts) on run #$runid')");
+								}
+						} else {
+								print " Not modifying points for $runner<br>";
+						}
+				}
+				
+				print "Finished checking runners<br>";
+				$sta->finish;
+		}
   }
 
   #BUG, if anyone has zero points for this run it wont get past the above code
-
-
-  print "<p>Removing leader from point list</p>";
-
-  # Remove leader from pointdata. He has special code.
-  $sth = $dbh->prepare("select name from users where id=$leader");
-  $sth->execute;
-  my ($leader_name) = $sth->fetchrow_array;
-
-  $dbh->do("delete from run_points_$runid where runner='$leader_name'");
 
   printf "<p>Deleting selected items</p>";
 

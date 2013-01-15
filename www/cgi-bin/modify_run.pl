@@ -267,7 +267,7 @@ EOT
     if (length $comments <= 0) {
       $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin removed comments on run #$runid')");
     } else {
-      $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,rt'$admin changed comments on run #$runid from $curr_comments to $comments')");
+      $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin changed comments on run #$runid from $curr_comments to $comments')");
     }
   }
 

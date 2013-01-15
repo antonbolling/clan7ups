@@ -45,18 +45,18 @@ EOT
     <table>
     <tr><td><input type="radio" name="run_type" value="clan" checked></td>
       <td><p>Clan run</p></td></tr>
-    <tr><td><input type="radio" name="run_type" value="self"></td>
-      <td><p>Self owned</p></td></tr>
+<!--    <tr><td><input type="radio" name="run_type" value="self"></td>
+      <td><p>Self owned</p></td></tr> -->
     </table>
 EOT
   } elsif ($run_type eq 'self') {
 #    print "<p>Testing in SELF</p>\n";
     print <<EOT;
     <table>
-    <tr><td><input type="radio" name="run_type" value="clan"></td>
+    <tr><td><input type="radio" name="run_type" value="clan" checked></td>
       <td><p>Clan run</p></td></tr>
-    <tr><td><input type="radio" name="run_type" value="self" checked></td>
-      <td><p>Self owned</p></td></tr>
+<!--    <tr><td><input type="radio" name="run_type" value="self" checked></td>
+      <td><p>Self owned</p></td></tr> -->
     </table>
 EOT
   }

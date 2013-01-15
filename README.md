@@ -8,13 +8,13 @@ Fork of old Fate Universal Points System.  This is an old perl website that's pr
 3. create your own mysql_config.cnf based on the provided example_mysql_config.cnf
 4. in www/cgi-bin/db.pl, update `MYSQL_CLIENT_CONFIG` to point to your mysql_config.cnf
 5. setup the database schema using the provided ups-database-schema.sql: `mysql -u ups_user -p ups_db < ups-database-schema.sql`
-6. You're ready to go! Serve the www/ directory with a perl cgi handler
-7. See the provided lighttpd.conf for an easy way to have the site up in five minutes
+6. insert the provided zones and points setup into the database: `bin/create-zones-schema | mysql -u ups_user -p ups_db`
+7. You're ready to go! Serve the www/ directory with a perl cgi handler
+8. See the provided lighttpd.conf for an easy way to have the site up in five minutes
 
 ## Administrator Notes
-* The only safe way to create a new account is to add them to a run; the non-existent account will be created when the run is approved
-* The only safe way to create a new administrator account is to promote an existing account to administrator
 * ups-database-schema.sql creates a default administrator account, username "admin", password "pw" - change this password ASAP
+* Don't use default "admin" account in runs, it will break things
 
 ## Missing Features from Fate UPS
 * 'Remove old equipment' is a BROKEN admin feature - there's no way to remove eq from system without having it picked

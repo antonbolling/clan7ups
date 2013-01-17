@@ -23,6 +23,10 @@ Fork of old Fate Universal Points System.  This is an old perl website that's pr
 * 'EQ Store' feature is missing / broken, which allowed certain items to be outright purchasable instead of taking bids
 * Fate UPS bestowed 25% bonus points to the run leader. This has been removed (zero bonus points to run leader)
 
+## Most Requested Features
+* notification when you're outbid
+* public listing of points, runs
+
 ## Upcoming
 * UPS comes with a list of top eq zones circa 2004. Needs updating. E.g. there's no Vondarkla
 * Fix some of the BROKENs above

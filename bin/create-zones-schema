@@ -64,7 +64,7 @@ end
 
 POINTS_PER_HOUR = 5040 # 5040 chosen as a highly divisible number for when splitting points among runners
 
-DEFAULT_PERCENT = 25 # Default zone to 25% points required to pick from that zone
+DEFAULT_PERCENT = 10 # Default zone to 25% points required to pick from that zone
 
 def points hours
   (POINTS_PER_HOUR * hours).to_i
@@ -87,7 +87,6 @@ ZONES << simple_zone("coliseum",1.25)
 ZONES << simple_zone("condemned",1)
 ZONES << simple_zone("eldricks",0.75)
 ZONES << simple_zone("verigaard",1)
-ZONES << simple_zone("estate",1)
 ZONES << simple_zone("den",0.75)
 ZONES << simple_zone("reclasta",1)
 ZONES << simple_zone("sevoseth",1)
@@ -100,6 +99,13 @@ ZONES << begin
            alps = simple_zone 'alps', 1
            alps.percent = 100
            alps
+         end
+
+ZONES << begin
+           estate = Zone.new 'estate', DEFAULT_PERCENT
+           estate.add_day 'full with count', points(1)
+           estate.add_day 'everything but count', points(0.5)
+           estate
          end
 
 ZONES << begin

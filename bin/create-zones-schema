@@ -103,8 +103,9 @@ ZONES << begin
 
 ZONES << begin
            estate = Zone.new 'estate', DEFAULT_PERCENT
-           estate.add_day 'full with count', points(1)
-           estate.add_day 'everything but count', points(0.5)
+           estate.add_day 'everything but count and nemesis', points(0.5)
+           estate.add_day 'only count', points(0.5)
+           estate.add_day 'only nemesis', points(0.25)
            estate
          end
 

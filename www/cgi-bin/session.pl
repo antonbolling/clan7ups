@@ -27,7 +27,7 @@ sub new_session {
 # RETURN: New session number on success, 0 on fail.
 sub get_session {
   my ($dbh, $q, $view_time) = @_;
-  my $session_timeout = 1800; # 30 minute session timeout.
+  my $session_timeout = 60 * 60 * 24 * 7; # 7 day session timeout (in seconds)
 
   my $uid = cook_int($q->param('uid'));
   my $cgi_magic = cook_int($q->param('magic'));

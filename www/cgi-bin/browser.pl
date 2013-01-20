@@ -33,11 +33,13 @@ sub browser {
   my $bid_query = "select id from bid_eq";
 
   if ($keywords) {
-    $keywords = uc $keywords;
-    my $new_text = " $adv upper(descr) like '%$keywords%'";
-    $bid_query .= $new_text;
+      my @keyword_list = split(/\s/, $keywords);
+      foreach my $keyword (@keyword_list) {
+          my $new_text = " $adv convert(descr USING latin1) collate latin1_swedish_ci like '%$keyword%'"; # convert/collate used to do case-insensitive string comparison on a binary string: http://dev.mysql.com/doc/refman/5.0/en/case-sensitivity.html
+          $bid_query .= $new_text;
 
-    $adv = 'and';
+          $adv = 'and';
+      }
   }
   if ($class ne 'any') {
     my $new_text = " $adv descr not like '% A$class %'";

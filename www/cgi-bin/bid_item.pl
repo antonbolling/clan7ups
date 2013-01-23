@@ -120,8 +120,13 @@ EOT
 
       bid_item_gui($dbh, $q, $view_time);
       return 1;
-    }
-    else {
+    } elsif ($bid > $max_upbid) {
+				print <<EOT;
+				<p>ERROR: Your bid of $bid exceeds your max upbid of $max_upbid. Please bid lower.</p>
+EOT
+        bid_item_gui($dbh, $q, $view_time);
+				return 1;
+		} else {
       print <<EOT;
       <p> SUCCESS: Placing a bid of $bid points on item $bid_item_num, $descr.
           Returning to the main menu.</p>

@@ -140,7 +140,7 @@ EOT
         my $cur_bid_time = $data->[8];
         my $add_time = $data->[9];
 
-        if ($bidder eq $admin_name) {
+        if (defined($bidder) && $bidder eq $admin_name) {
           $have_bid = 1;
         } else {
           $have_bid = 0;

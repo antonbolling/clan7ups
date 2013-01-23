@@ -7,7 +7,27 @@ use strict;
 require "cook.pl";
 require "modify_run_gui.pl";
 
-# Return the total points, to be split among all players, for the passed run id
+# Set run points for all runners in the passed run_id,
+# based on each runner's % attendance and total points for the run
+sub set_run_points_for_all_runners_based_on_attendance {
+  my ($dbh, $run_id) = @_;
+
+	my $total_points_for_run = total_points_for_run($dbh,$run_id);
+
+	my $sth = $dbh->prepare("select runner, percent_attendance, FLOOR($total_points_for_run * percent_attendance / total_percent_attendance) as new_points from run_points_$run_id, (select sum(percent_attendance) as total_percent_attendance from run_points_$run_id) as tmp");
+	$sth->execute;
+	if ($sth->rows) {
+			my $update_points_dbh = $dbh->prepare("update run_points_$run_id set points = ? where runner = ?");
+			while (my ($runner,$percent_attendance, $new_points) = $sth->fetchrow_array) {
+					print STDERR "run $run_id $runner with attendance $percent_attendance updating points to $new_points\n";
+					$update_points_dbh->execute($new_points,$runner);
+			}
+			$update_points_dbh->finish
+	}
+	$sth->finish;
+}
+
+# Return the total points for the passed run id
 sub total_points_for_run {
   my ($dbh, $run_id) = @_;
 	
@@ -16,44 +36,14 @@ sub total_points_for_run {
   $sth->execute;
   my ($zone_name,$day_num) = $sth->fetchrow_array;
 
-  print "<p>PICKDAY: zone_name = $zone_name.</p>\n";
-
   # Get the default value for this day,
   $sth = $dbh->prepare("select points from zone_points_$zone_name where id=$day_num");
   $sth->execute;
   my ($total_points_for_day) = $sth->fetchrow_array;
 
-  print "<p>PICKDAY: day_points = $total_points_for_day</p>\n";
+	print STDERR "run $run_id has zone $zone_name day $day_num with total points $total_points_for_day\n";
 
 	return $total_points_for_day;
-}
-
-# Return the number of people on a run, for the passed run id
-sub number_of_runners {
-  my ($dbh, $run_id) = @_;
-
-  my $sth = $dbh->prepare("select count(*) from run_points_$run_id");
-  $sth->execute;
-
-  my ($number_of_runners) = $sth->fetchrow_array;
-
-  return $number_of_runners;
-}
-
-# Return the default number of points each runner should get,
-# equal to the number of points for the run/day divided by number of runners
-sub points_per_runner {
-  my ($dbh, $run_id) = @_;
-
-  my $total_points_for_day = total_points_for_run($dbh,$run_id);
-
-  my $number_of_runners = number_of_runners($dbh,$run_id);
-
-	my $points_per_runner = int($total_points_for_day / $number_of_runners); # always round down. This avoids the case where a large number of runners, rounded up, creates a large number of bonus points
-
-	print "<p>PICKDAY: points_per_runner = $points_per_runner</p>\n";
-
-	return $points_per_runner;
 }
 
 sub pick_day {
@@ -69,11 +59,7 @@ sub pick_day {
   my $sth = $dbh->prepare("update runs set day=$day_num where id=$runid");
   $sth->execute;
 
-	my $points_per_runner = points_per_runner($dbh,$runid);
-
-  # Modify points data. We already populated the table with users, so just set values.
-  $sth = $dbh->prepare("update run_points_$runid set points=$points_per_runner");
-  $sth->execute;
+	set_run_points_for_all_runners_based_on_attendance($dbh,$runid);
 
   # Done! Jump to modify_run_gui.
   modify_run_gui($dbh, $q, $view_time);

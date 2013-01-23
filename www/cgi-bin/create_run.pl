@@ -28,7 +28,6 @@ sub create_run {
   my $eqlist = $q->param('eqlist');
   my $comments = cook_string($q->param('comments'));
 
-#  print "<p>Creating run: runtype=$runtype zone name=$zone</p>";
   #Create the run.
   $dbh->do("insert into runs (zone,leader,type,status,add_stamp,mod_stamp,comments) values('$zone',$leader,'$runtype','pending',FROM_UNIXTIME($view_time),FROM_UNIXTIME($view_time),'$comments')");
 
@@ -37,8 +36,6 @@ sub create_run {
   $sth->execute;
   my ($runid) = $sth->fetchrow_array;
   $sth->finish;
-
-#  print "<p>Run id: $runid</p>\n";
 
   #Get the leader's name.
   $sth = $dbh->prepare("select name from users where id=$leader");
@@ -52,23 +49,17 @@ sub create_run {
   $sth->execute;
   my ($num_days) = $sth->fetchrow_array;
 
-#  print "<p>num_days for this zone is $num_days</p>\n";
-
   #Create a pointdata table for this run.
-  $dbh->do("create table run_points_$runid (runner char(20) primary key, points int)");
+  $dbh->do("create table run_points_$runid (runner char(20) primary key, points int not null default 0, percent_attendance int not null default 100)");
 
   #Preliminary pointdata for each runner. Create a run_points table for this run
   #populate it with runners and call pick_day.
   my @runnerlist = $runners =~ /(\w+)/g;
   @runnerlist = map { lc $_ } @runnerlist;
 
-#  print "<p>Leader: $leader_name, uid $leader. Run type $runtype</p>\n";
-
   foreach (@runnerlist) {
     my $runner = cook_word(lc $_);
-#    print "<p>Found runner: $runner. Assigning pointvalue 0</p>\n";
-
-    $dbh->do("insert into run_points_$runid values ('$runner',0)");
+    $dbh->do("insert into run_points_$runid (runner) values ('$runner')");
   }
 
   #Handle the eq list.

@@ -122,6 +122,7 @@ EOT
     my $delete_runner_string = join ',', @quoted_delete_runners;
 
     print "<p>Deleting runnerlist: $delete_runner_string</p>\n";
+    print STDERR "run $runid deleting runnerlist: $delete_runner_string\n";
 
     $dbh->do("delete from run_points_$runid where runner in ($delete_runner_string)");
 
@@ -130,12 +131,9 @@ EOT
     
     #Log this
     $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin deleted $tmpstring from run #$runid')");
-
-    #my $num_deleted = $sth->rows;
-    #print "<p>Database reports $num_deleted runners deleted</p>\n";
   }
 
-  # ADD RUNNERS give them 0 points and it will be updated with new split value below
+  # ADD RUNNERS
   my $runners = cook_string($q->param('runners'));
   my @runlist = $runners =~ /(\w+)/g;
   @runlist = map { lc $_ } @runlist;
@@ -145,64 +143,56 @@ EOT
   foreach (@runlist) {
 			$runners_were_added = 1;
     my $runner = cook_word($_);
-    print "<p>Adding runner $runner to database</p>\n";
-    $dbh->do("insert into run_points_$runid values ('$runner',0)");
-    #Log this
+    print "Adding runner $runner to database<br>";
+    print STDERR "run $runid adding runner $runner\n";
+    $dbh->do("insert into run_points_$runid (runner) values ('$runner')");
     $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin added $runner to run $runid with 0 points')");
   }
 
   printf "<p>Done adding runners</p>\n";
 
-  # If runners were added or deleted, update all runners' points values with the new split value (based new on # of runners)
+	# SET PERCENT ATTENDANCE - update percent_attendance using parameter percent_attendance_$runner
 
-  if ($runners_were_deleted || $runners_were_added) {
-    my $points_per_runner = points_per_runner($dbh,$runid);
+	$sth = $dbh->prepare("select runner from run_points_$runid");
+	$sth->execute;
+	
+	if ($sth->rows) {
+			my $sta = $dbh->prepare("select percent_attendance from run_points_$runid where runner = ?");
+			while (my ($runner) = $sth->fetchrow_array) {
+					print "Checking $runner to update attendance<br>";
+					my $new_percent_attendance = cook_int($q->param("percent_attendance_$runner"));
+					if ($new_percent_attendance) {
+							if ($new_percent_attendance < 1) {
+									print "new attendance provided for $runner was below 1, setting to 1<br>";
+									$new_percent_attendance = 1;
+							} elsif ($new_percent_attendance > 100) {
+									print "new attendance provided for $runner was above 100, setting to 100<br>";
+									$new_percent_attendance = 100;
+							}
 
-		$sth = $dbh->prepare("update run_points_$runid set points = $points_per_runner");
-		$sth->execute;
-  
-		print "<p>WARNING: reset all runners' points to the new split value of $points_per_runner</p>";
-		print "<p>WARNING: ignoring any custom modifications to runner points, because runners were added or deleted. Make your changes again.</p>";
-	} else {
+							$sta->execute($runner);
+							my $current_percent_attendance = $sta->fetchrow_array;
+							
+							if ($new_percent_attendance != $current_percent_attendance) {
+									$dbh->do("update run_points_$runid set percent_attendance=$new_percent_attendance where runner='$runner'");
+									print " Updating percent attendance for $runner: old: $current_percent_attendance, new: $new_percent_attendance<br>";
+									print STDERR "run $runid updating percent attendance for $runner: old: $current_percent_attendance, new: $new_percent_attendance\n";
+									$dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin changed percent_attendance for $runner to $new_percent_attendance (from $current_percent_attendance) on run #$runid')");
+							}
+					} else {
+							print " Not modifying percent attendance for $runner<br>";
+					}
+			}
+			
+			print "Done modifying runner attendance<br>";
+			$sta->finish;
+	}
 
-    # This "else" block, which handles manual points modifications, is only done when runners aren't added or deleted. This is because all points are reset when runners are added/deleted.
+	# UPDATE POINTS
+	# update points which may change when runners are added/deleted or attendance is modified
+	set_run_points_for_all_runners_based_on_attendance($dbh,$runid);
 
-    #Any 'points_$runner' left with entry for $runner in db gets installed in
-   	#run_point_data.
-		$sth = $dbh->prepare("select runner from run_points_$runid");
-		$sth->execute;
-
-		if ($sth->rows) {
-				my $sta;
-				while (my ($runner) = $sth->fetchrow_array) {
-						print "Checking $runner<br>";
-						my $point_control = cook_int($q->param("points_$runner"));
-						if ($point_control) {
-								# We have input for this user.
-								#Only update point values if the new value is different from the current pts
-								#that the user has on this run
-								
-								#print "select points from run_points_$runid where runner='$runner'<br";
-								$sta = $dbh->prepare("select points from run_points_$runid where runner='$runner'");
-								$sta->execute;
-								my $current_pts = $sta->fetchrow_array;
-								
-								if ($point_control != $current_pts) {
-										$dbh->do("update run_points_$runid set points=$point_control where runner='$runner'");
-										print " Updating point value for $runner: $point_control<br>";
-										$dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin changed points for $runner to $point_control (from $current_pts) on run #$runid')");
-								}
-						} else {
-								print " Not modifying points for $runner<br>";
-						}
-				}
-				
-				print "Finished checking runners<br>";
-				$sta->finish;
-		}
-  }
-
-  #BUG, if anyone has zero points for this run it wont get past the above code
+	# ITEMS
 
   printf "<p>Deleting selected items</p>";
 

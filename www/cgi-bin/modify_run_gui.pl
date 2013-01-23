@@ -9,6 +9,7 @@ use strict;
 require "session.pl";
 require "ups_util.pl";
 require "cook.pl";
+require "pick_day.pl";
 
 sub modify_run_gui {
   my ($dbh, $q, $view_time) = @_;
@@ -23,6 +24,8 @@ sub modify_run_gui {
   $sth = $dbh->prepare("select status from runs where id='$runid'");
   $sth->execute;
   my ($status) = $sth->fetchrow_array;
+
+  my $total_run_points = total_points_for_run($dbh, $runid);
 
   print <<EOT;
   <h3>Modifying run $runid, zone $zone_name day $day. Current status is <b>$status</b></h3>
@@ -118,11 +121,10 @@ EOT
   <textarea name="eqlist" rows=3 cols=120></textarea>
   <hr>
  <h4>Run leader: $run_leader (must still appear in list below to receive points)</h4>
+ <h4>Total points split among runners: $total_run_points</h4>
 EOT
 
- 
-
-  $sth = $dbh->prepare("select runner, points from run_points_$runid");
+  $sth = $dbh->prepare("select runner, points, percent_attendance from run_points_$runid");
   $sth->execute;
 
   if (!$sth->rows) {
@@ -134,18 +136,19 @@ EOT
   } else {
     #Found runners
     print <<EOT;
-    <h4>Modify runner awards / Delete runners</h4>
+    <h4>Modify percent attendance / Delete runners</h4>
     <table>
       <tr>
         <td><b>DELETE</b></td>
         <td><b>Point award</b></td>
+        <td><b>Percent Attendance</b></td>
         <td><b>Player</b></td>
         <td><b>Exists?</b></td>
       </tr>
 EOT
 
     while (my $data = $sth->fetchrow_arrayref) {
-      my ($runner, $award) = @$data;
+      my ($runner, $award, $percent_attendance) = @$data;
 
       #Does runner exist?
       my $usth = $dbh->prepare("select id from users where name='$runner'");
@@ -173,7 +176,8 @@ EOT
       print <<EOT;
       <tr>
       <td><input type="checkbox" name="delete_runner" value="$runner"></td>
-      <td><input type="text" name="points_$runner" value="$award"></td>
+			<td>$award</td>
+      <td><input type="text" name="percent_attendance_$runner" value="$percent_attendance"></td>
       <td>$runner</td>
       $exists
       </tr>

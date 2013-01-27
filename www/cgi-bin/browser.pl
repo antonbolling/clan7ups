@@ -105,7 +105,7 @@ sub browser {
   <input type="hidden" name="action" value="bid_item_gui">
 
   <tr id="bid_header">
-    <td>Bid</td><td>Zone</td><td>Desc</td>
+    <td>Bid</td><td>Id</td><td>Zone</td><td>Desc</td>
     <td id="browser_minbid">M</td>
     <td id="browser_curbid">A</td>
     <td id="browser_minupb">U</td>
@@ -202,6 +202,7 @@ EOT
         }
         print <<EOT;
         </td>
+        <td><span class="smfont">$eqid</span></td>
         <td><span class="smfont">$zone_name</span></td>
         <td><span class="smfont">$eq_descr</span></td>
         <td id="browser_minbid"><span class="smfont">$min_bid</span></td>

@@ -69,6 +69,8 @@ EOT
   # User: Allow to modify any runs belonging to the user..
   list_runs_user($dbh, $q, $view_time);
 
+  display_notifications($dbh, $session_info, $uid);
+
   # User: Display pickable and waiting eq from store.
   list_bids($dbh, $q, $view_time);
 
@@ -326,6 +328,42 @@ EOT
 </form>
 
 EOT
+}
+
+sub display_notifications {
+  my ($dbh, $session_info, $uid) = @_;
+
+	my $notifications_sql = $dbh->prepare("select notification from user_notifications where user_id = ?");
+  $notifications_sql->execute($uid);
+
+  my $at_least_one_notification = 0;
+
+	my $rendered_notifications = "";
+
+  # BY CONVENTION, ALL NOTIFICATIONS MUST be a string containing a html form omitting a trailing </form> tag. main_menu.pl will append the </form> tag with the proper session_info
+  while (my $notification_row = $notifications_sql->fetchrow_arrayref) {
+			$at_least_one_notification = 1;
+			my $notification = $notification_row->[0];
+      $rendered_notifications .= <<EOT;
+			<div class="user-notification">
+					$notification
+					$session_info
+					</form>
+			</div><br>
+EOT
+	}
+
+	if ($at_least_one_notification) {
+			print <<EOT;
+			<h3>Notifications</h3>
+			$rendered_notifications
+			<form method="post" name="clear_notifications" action="/cgi-bin/ups.pl">
+					<input type="hidden" name="action" value="clear_notifications">
+					$session_info
+					<input type="submit" value="Clear Notifications">
+					</form>
+EOT
+	}
 }
 
 sub list_bids {

@@ -13,4 +13,12 @@ sub add_user {
   $sth->execute;
 }
 
+sub get_user_id_by_name {
+		my ($dbh, $user_name) = @_;
+		my $user_id_sql = $dbh->prepare("select id from users where name = ?");
+		$user_id_sql->execute($user_name);
+		my ($user_id) = $user_id_sql->fetchrow_array;
+		return $user_id;
+}
+
 1;

@@ -171,6 +171,12 @@ if ($magic = get_session($dbh, $q, $view_time)) {
     require "revalue_bid.pl";
     revalue_bid($dbh, $q, $view_time);
   }
+	elsif ($action eq 'clear_notifications') {
+			require "user_notifications.pl";
+			clear_notifications_by_user_id($dbh, $uid);
+			require "main_menu.pl";
+			main_menu($dbh, $q, $view_time);
+	}
 } else {
   session_expired();
 }

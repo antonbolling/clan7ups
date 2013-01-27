@@ -107,3 +107,13 @@ CREATE TABLE zones (
   num_days int(11) default NULL,
   PRIMARY KEY  (id)
 );
+
+CREATE TABLE user_notifications (
+  id int NOT NULL auto_increment,
+  user_id int NOT NULL,
+  notification text NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+	  ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  PRIMARY KEY  (id)
+);

@@ -13,6 +13,7 @@ require "main_menu.pl";
 require "time_string.pl";
 require "ups_util.pl";
 require "bid_item_gui.pl";
+require "user_notifications.pl";
 
 my $one_day = 86400;
 my $three_days = 259200;
@@ -45,7 +46,7 @@ EOT
 
   print "<p>$matches matches</p>";
 
-  my ($zone, $descr, $min_bid, $bidder, $bid, $cur_bid_time, $first_bid_time, $add_time) =
+  my ($zone, $descr, $min_bid, $current_bidder, $current_bid, $cur_bid_time, $first_bid_time, $add_time) =
      $sth->fetchrow_array;
 
   if (!$matches) {
@@ -53,7 +54,7 @@ EOT
     main_menu($dbh, $q, $view_time);
     return 1;
   }
-  elsif (defined($bidder) and $bidder eq $login) {
+  elsif (defined($current_bidder) and $current_bidder eq $login) {
     print <<EOT;
     <p>You already have the standing bid on this item. Returning to main.</p>
 EOT
@@ -81,12 +82,12 @@ EOT
   # Got this far. The item is biddable. Get a little more information;
   # Calculate min upbid.
   my $min_upbid;
-  if (!$bid) {
-    $bid = 'N/A';
+  if (!$current_bid) {
+    $current_bid = 'N/A';
     $min_upbid = $min_bid;
   }
   else {
-    $min_upbid = $bid * 1.1;
+    $min_upbid = $current_bid * 1.1;
     my $int_upbid = int($min_upbid);
 
     if ($int_upbid < $min_upbid) {
@@ -137,6 +138,10 @@ EOT
 
       $dbh->do("update bid_eq set bid=$bid, bidder='$login', status='bidding', cur_bid_time=now() where id=$bid_item_num");
 
+			if ($first_bid_time) {
+					create_outbid_notification($dbh, $current_bidder, $bid_item_num, $descr, $current_bid, $bid);
+			}
+
       if (!$first_bid_time) {
         $dbh->do("update bid_eq set first_bid_time=now() where id=$bid_item_num");
       }
@@ -145,6 +150,21 @@ EOT
       return 1;
     }
   }
+}
+
+sub create_outbid_notification {
+		my ($dbh, $old_bidder, $bid_item_num, $descr, $old_bid, $new_bid) = @_;
+
+		my $upbid_notification = <<EOT;
+		<form method="post" name="outbid_notification" action="/cgi-bin/ups.pl">
+				<input type="hidden" name="action" value="bid_item_gui">
+				<input type="hidden" name="bid_item" value='$bid_item_num'>
+				outbid on ID $bid_item_num, your bid of $old_bid was replaced by $new_bid, $descr
+				<input type="submit" value="Upbid">
+EOT
+# BY CONVENTION, ALL NOTIFICATIONS MUST be a string containing a html form omitting a trailing </form> tag. main_menu.pl will append the </form> tag with the proper session_info
+    print STDERR "bid_item.pl: creating outbid notification for item $bid_item_num, previous bidder $old_bidder\n";
+		create_notification_by_user_name($dbh,$old_bidder,$upbid_notification);
 }
 
 1;

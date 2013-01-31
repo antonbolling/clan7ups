@@ -5,6 +5,7 @@ use warnings;
 use strict;
 
 require "session.pl";
+require "ups_util.pl";
 
 sub create_run_gui {
   my ($dbh, $q, $view_time) = @_;
@@ -66,7 +67,11 @@ EOT
 
     <input type="submit" value="Submit this run">
   </form>
-
+	<br>
+	Or, Cancel:
+EOT
+  return_main($dbh,$q,$view_time);
+print <<EOT;
   <hr>
   <h3> How to use this dialog </h3>
 

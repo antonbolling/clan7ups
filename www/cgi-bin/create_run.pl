@@ -54,8 +54,13 @@ sub create_run {
 
   #Preliminary pointdata for each runner. Create a run_points table for this run
   #populate it with runners and call pick_day.
-  my @runnerlist = $runners =~ /(\w+)/g;
+  my @runnerlist = $runners =~ /([a-zA-Z]{2,})/g;
   @runnerlist = map { lc $_ } @runnerlist;
+
+	my @word_blacklist = qw(press return or abort name status clan afk medlink cle war thi mag legend formation undead corpse in current class sex level lv total levels cc tl total players visible to you); # remove a list of common words, making it easier to paste who -z
+	foreach my $word (@word_blacklist) {
+			@runnerlist = grep { !/$word/ } @runnerlist;
+	}
 
   foreach (@runnerlist) {
     my $runner = cook_word(lc $_);

@@ -105,8 +105,11 @@ EOT
             </td>
           </tr>
           <tr>
-            <td><input type="checkbox" name="afford_item" value="true"></td>
-            <td>Only items you can afford (TESTING)</td>
+					<td>
+					<input type="radio" name="order_eq_by" value="new_items_first" checked> Show new items first<br>
+					<input type="radio" name="order_eq_by" value="similar_items_together"> Show similar items together<br>
+					<input type="radio" name="order_eq_by" value="high_bids_first"> Show highest bids first<br>
+					</td>
           </tr>
       </table>
 

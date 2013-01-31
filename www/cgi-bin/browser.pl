@@ -26,7 +26,7 @@ sub browser {
   my $align = cook_word($q->param('align'));
   my $loc = cook_word($q->param('loc'));
   my $zone = cook_word($q->param('zone'));
-  my $afford = $q->param('afford_item');
+  my $order_eq_by = cook_word($q->param('order_eq_by'));
   my $admin = cook_int($q->param('uid'));
 
   my $adv = 'where';
@@ -116,9 +116,18 @@ sub browser {
 EOT
 
       my $in_list = join ',', @biddable_eq;
-      #    print "<p>in_list: $in_list</p>\n";
 
-      $sth = $dbh->prepare("select id,bidder,zone,descr,min_bid,bid,ceiling(bid*1.1) as min_upbid, UNIX_TIMESTAMP(first_bid_time), UNIX_TIMESTAMP(cur_bid_time), UNIX_TIMESTAMP(add_time) from bid_eq where id in ($in_list) order by descr,add_time");
+			my $eq_query = "select id,bidder,zone,TRIM(descr),min_bid,bid,ceiling(bid*1.1) as min_upbid, UNIX_TIMESTAMP(first_bid_time), UNIX_TIMESTAMP(cur_bid_time), UNIX_TIMESTAMP(add_time) from bid_eq where id in ($in_list) ";
+			
+			if ( $order_eq_by eq "high_bids_first" ) {
+					$eq_query .= " order by bid DESC, descr, add_time";
+			} elsif ( $order_eq_by eq "new_items_first" ) {
+					$eq_query .= " order by add_time DESC, descr";
+			} else { # default to "similar_items_together"
+					$eq_query .= " order by descr, bid, add_time";
+			}
+
+      $sth = $dbh->prepare($eq_query);
       $sth->execute;
 
     # For display purposes we need info for: maximum allowable bid by zone,

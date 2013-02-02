@@ -21,4 +21,12 @@ sub get_user_id_by_name {
 		return $user_id;
 }
 
+sub get_user_name_by_id {
+		my ($dbh, $user_id) = @_;
+		my $user_name_sql = $dbh->prepare("select name from users where id= ?");
+		$user_name_sql->execute($user_id);
+		my ($user_name) = $user_name_sql->fetchrow_array;
+		return $user_name;
+}
+
 1;

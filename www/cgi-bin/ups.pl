@@ -176,6 +176,16 @@ if ($magic = get_session($dbh, $q, $view_time)) {
 			clear_notifications_by_user_id($dbh, $uid);
 			require "main_menu.pl";
 			main_menu($dbh, $q, $view_time);
+	}	
+	elsif ($action eq 'user_transfer_points_gui') {
+			require "user_transfer_points.pl";
+			user_transfer_points_gui($dbh,$q,$view_time);
+	}
+	elsif ($action eq 'user_transfer_points') {
+			require "user_transfer_points.pl";
+			user_transfer_points($dbh,$q,$view_time);
+			require "main_menu.pl";
+			main_menu($dbh, $q, $view_time);
 	}
 } else {
   session_expired();

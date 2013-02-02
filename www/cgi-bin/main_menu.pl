@@ -301,6 +301,7 @@ $session_info
 <select name="action">
 <option value="create_run_gui">Submit a run
 <option value="user_info_gui">Modify your user info
+<option value="user_transfer_points_gui">Transfer points to another user
 EOT
 
   # What access level are we?

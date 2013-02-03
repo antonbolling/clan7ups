@@ -135,12 +135,17 @@ EOT
 
   # ADD RUNNERS
   my $runners = cook_string($q->param('runners'));
-  my @runlist = $runners =~ /(\w+)/g;
-  @runlist = map { lc $_ } @runlist;
+  my @runnerlist = $runners =~ /([a-zA-Z]{2,})/g;
+  @runnerlist = map { lc $_ } @runnerlist;
+
+	my @word_blacklist = qw(press return or abort name status clan afk medlink cle war thi mag legend formation undead corpse in current class sex level lv total levels avt cc tl total players visible to you); # remove a list of common words, making it easier to paste who -z
+	foreach my $word (@word_blacklist) {
+			@runnerlist = grep { !/^$word$/ } @runnerlist;
+	}
 
   my $runners_were_added = 0;
 
-  foreach (@runlist) {
+  foreach (@runnerlist) {
 			$runners_were_added = 1;
     my $runner = cook_word($_);
     print "Adding runner $runner to database<br>";

@@ -95,6 +95,9 @@ sub browser {
       print <<EOT;
 
 <h3>Bid system - $num_biddable_items matches:</h3>
+EOT
+      return_main($dbh, $q, $view_time);
+		 	print <<EOT;
 <table border=0 width=100% cellpadding=0 cellspacing=1 bgcolor=cccccc>
 <tr>
 <td>

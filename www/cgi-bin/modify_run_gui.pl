@@ -124,7 +124,87 @@ EOT
  <h4>Total points split among runners: $total_run_points</h4>
 EOT
 
-  $sth = $dbh->prepare("select runner, points, percent_attendance from run_points_$runid");
+  display_runners($dbh, $runid);
+
+  # Comments
+  $sth = $dbh->prepare("select comments from runs where id=$runid");
+  $sth->execute;
+  my ($comments) = $sth->fetchrow_array;
+
+  print <<EOT;
+  <h4> Comments </h4>
+  <textarea rows=8 cols=80 name="comments">$comments</textarea>
+EOT
+
+  print <<EOT;
+    <h4> Next action </h4>
+    <p><select name="action">
+    <option value="modify_run" selected>Save changes
+EOT
+
+  if ($access eq 'gate' or $access eq 'admin') {
+    print <<EOT;
+    <option value="deny_run">Save changes, flag as denied
+    <option value="approve_run">Save changes, approve
+EOT
+  }
+
+  print <<EOT;
+  <option value="delete_run">Delete this run
+  </select></p>
+EOT
+
+  print <<EOT;
+  <br>
+  <input type="submit" value="Submit">
+  </form>
+EOT
+
+  return_main($dbh, $q, $view_time);
+
+  print <<EOT;
+  <h3>Using this dialog: first time users must read</h3>
+  <p> This dialog performs 2 different functions: it allows runners to modify th
+e info for runs they
+      submit, as well as allowing gatekeepers to review/modify run info before a
+pproving point
+      rewards and moving eq entries to the main database. This dialog displays m
+any options, some
+      of which interact in non obvious ways. </p>
+  <h4>Information for users</h3>
+  <p> You should find yourself at this dialog right after submitting a run from 
+the 'submit a run'
+      dialog off the main menu. At this point, if the zone is a multi-day zone, 
+the very first thing
+      you should do is choose which day you ran and hit submit. </p>
+  <p> Changing which day you ran automatically resets all runners' pointvalues a
+fter you submit.
+      This is why you always do it first. If you change the day again all runner
+ point rewards will
+      reset to the new day's default, regardless of what you had input. </p>
+  <p> Next, remember that clicking 'return to main' will NOT save the changes yo
+u made to this run.
+      ALWAYS click submit when you're done modifying your run, THEN return to ma
+in IF all information
+      is correct. </p>
+  <h4>Information for gatekeepers and admins</h4>
+  <p> If you are a gatekeeper or admin you will have access to the advanced feat
+ures here; you'll see
+      value and system options for each piece of eq submitted with a run. Make s
+ure these are set properly
+      before clicking on approve. Note that rejecting a run won't save changes; 
+if you want to 
+      communicate reasons to the leader change the comments field, submit with a
+ction set to modify,
+      then select reject and submit. </p>
+  <p> For now just live with these peculiarities. We'll make it more foolproof l
+ater. </p>
+EOT
+}
+
+sub display_runners {
+my ($dbh, $runid) = @_;
+  my $sth = $dbh->prepare("select runner, points, percent_attendance from run_points_$runid");
   $sth->execute;
 
   if (!$sth->rows) {
@@ -194,82 +274,8 @@ EOT
   <textarea name="runners" rows=5 cols=80></textarea>
   <hr>
 EOT
-
-  # Comments
-  $sth = $dbh->prepare("select comments from runs where id=$runid");
-  $sth->execute;
-  my ($comments) = $sth->fetchrow_array;
-
-  print <<EOT;
-  <h4> Comments </h4>
-  <textarea rows=5 cols=80 name="comments">$comments</textarea>
-EOT
-
-  print <<EOT;
-    <h4> Next action </h4>
-    <p><select name="action">
-    <option value="modify_run" selected>Save changes
-EOT
-
-  if ($access eq 'gate' or $access eq 'admin') {
-    print <<EOT;
-    <option value="deny_run">Save changes, flag as denied
-    <option value="approve_run">Save changes, approve
-EOT
-  }
-
-  print <<EOT;
-  <option value="delete_run">Delete this run
-  </select></p>
-EOT
-
-  print <<EOT;
-  <br>
-  <input type="submit" value="Submit">
-  </form>
-EOT
-
-  return_main($dbh, $q, $view_time);
-
-  print <<EOT;
-  <h3>Using this dialog: first time users must read</h3>
-  <p> This dialog performs 2 different functions: it allows runners to modify th
-e info for runs they
-      submit, as well as allowing gatekeepers to review/modify run info before a
-pproving point
-      rewards and moving eq entries to the main database. This dialog displays m
-any options, some
-      of which interact in non obvious ways. </p>
-  <h4>Information for users</h3>
-  <p> You should find yourself at this dialog right after submitting a run from 
-the 'submit a run'
-      dialog off the main menu. At this point, if the zone is a multi-day zone, 
-the very first thing
-      you should do is choose which day you ran and hit submit. </p>
-  <p> Changing which day you ran automatically resets all runners' pointvalues a
-fter you submit.
-      This is why you always do it first. If you change the day again all runner
- point rewards will
-      reset to the new day's default, regardless of what you had input. </p>
-  <p> Next, remember that clicking 'return to main' will NOT save the changes yo
-u made to this run.
-      ALWAYS click submit when you're done modifying your run, THEN return to ma
-in IF all information
-      is correct. </p>
-  <h4>Information for gatekeepers and admins</h4>
-  <p> If you are a gatekeeper or admin you will have access to the advanced feat
-ures here; you'll see
-      value and system options for each piece of eq submitted with a run. Make s
-ure these are set properly
-      before clicking on approve. Note that rejecting a run won't save changes; 
-if you want to 
-      communicate reasons to the leader change the comments field, submit with a
-ction set to modify,
-      then select reject and submit. </p>
-  <p> For now just live with these peculiarities. We'll make it more foolproof l
-ater. </p>
-EOT
 }
+
 1;
 
 

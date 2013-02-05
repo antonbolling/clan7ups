@@ -13,6 +13,7 @@ require "points.pl";
 require "cook.pl";
 require "time_string.pl";
 require "pickable.pl";
+require "recent_runs.pl";
 
 my $one_day = 86400;
 my $three_days = 259200;
@@ -70,6 +71,8 @@ EOT
   list_runs_user($dbh, $q, $view_time);
 
   display_notifications($dbh, $session_info, $uid);
+
+	print recent_runs($dbh, $login);
 
   # User: Display pickable and waiting eq from store.
   list_bids($dbh, $q, $view_time);
@@ -356,6 +359,7 @@ EOT
 
 	if ($at_least_one_notification) {
 			print <<EOT;
+			<hr>
 			<h3>Notifications</h3>
 			$rendered_notifications
 			<form method="post" name="clear_notifications" action="/cgi-bin/ups.pl">

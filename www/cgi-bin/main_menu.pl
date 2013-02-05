@@ -72,7 +72,7 @@ EOT
 
   display_notifications($dbh, $session_info, $uid);
 
-	print recent_runs($dbh, $login);
+	print recent_runs($dbh, $login, $access, $session_info);
 
   # User: Display pickable and waiting eq from store.
   list_bids($dbh, $q, $view_time);

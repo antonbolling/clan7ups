@@ -31,7 +31,6 @@ sub recent_runs_gui {
 		my $at_least_one_run = $recent_runs_sql->rows;
 
 		my $html = <<EOT;
-		  <hr>
 		  <h3>All Recent Runs</h3>
       <span style='background-color:yellow;'><i>Pending</i></span> runs aren't on UPS yet - you won't see points or eq from a pending run.<br><br>
 EOT

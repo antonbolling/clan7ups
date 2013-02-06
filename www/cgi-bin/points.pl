@@ -138,39 +138,22 @@ sub get_zone_points_from_username {
 		return $points ? $points : 0;
 }
 
-# Takes: zone name, delta. positive or negative.
-# Returns: new point value.
-sub modify_zone_points {
-  my ($dbh, $q, $view_time, $zone, $delta) = @_;
+# Add points_delta to the passed user_name's points to the passed zone
+# Return the new points value
+sub modify_zone_points_for_user {
+  my ($dbh, $user_name, $zone, $points_delta) = @_;
 
-  my $uid = cook_int($q->param('uid'));
-  my $sth = $dbh->prepare("select name from users where id=$uid");
-  $sth->execute;
-
-  my ($username) = $sth->fetchrow_array;
-
-  $sth = $dbh->prepare("select points from user_points_$username where zone='$zone'");
-  $sth->execute;
-
-  # If it's an undefined zone, exit
-  if(! $zone) {
-    return 1;
-  }
+  my $sth = $dbh->prepare("select points from user_points_$user_name where zone = ?");
+  $sth->execute($zone);
 
   # Entry doesn't exist. create, initialize to 0.
   if(! $sth->rows) {
-    $sth = $dbh->prepare("insert into user_points_$username values('$zone', 0)");
-    $sth->execute;
+    $sth = $dbh->prepare("insert into user_points_$user_name values(?, ?)");
+    $sth->execute($zone,0);
   }
 
-  $sth = $dbh->prepare("update user_points_$username set points = points + $delta where zone='$zone'");
-  $sth->execute;
-  $sth = $dbh->prepare("select points from user_points_$username where zone='$zone'");
-  $sth->execute;
-
-  my ($new_zone_points) = $sth->fetchrow_array;
-
-  return $new_zone_points;
+  $sth = $dbh->prepare("update user_points_$user_name set points = points + ? where zone = ?");
+  $sth->execute($points_delta, $zone);
 }
 
 # Take: standard.

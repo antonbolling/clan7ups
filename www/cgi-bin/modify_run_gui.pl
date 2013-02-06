@@ -203,7 +203,7 @@ EOT
 }
 
 sub display_runners {
-my ($dbh, $runid) = @_;
+  my ($dbh, $runid) = @_;
   my $sth = $dbh->prepare("select runner, points, percent_attendance from run_points_$runid");
   $sth->execute;
 

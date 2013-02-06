@@ -27,7 +27,7 @@ sub new_session {
 
 # STACK:  $dbh, $q, $time
 # RETURN: New session number on success, 0 on fail.
-sub get_session {
+sub refresh_session {
   my ($dbh, $q, $view_time) = @_;
   my $session_timeout = 60 * 60 * 24 * 7; # 7 day session timeout (in seconds)
 
@@ -47,6 +47,9 @@ sub get_session {
     my $new_magic = int rand(2147483648);
     my $sql = $dbh->prepare("update users set session_stamp=now(), magic=? where id=?");
 		$sql->execute($new_magic,$uid);
+
+		# Update the CGI object new_magic, so that any generated pages will have correct new magic
+		$q->param('magic',$new_magic);
 
     return 1;
   }
@@ -87,19 +90,14 @@ sub no_access {
 EOT
 }
 
-# Stack: $dbh, $q, $view_time
 # Return: String with hidden input tags for session tokens (uid, magic).
 sub get_session_info {
   my ($dbh, $q, $view_time) = @_;
 
   my $uid = cook_int($q->param('uid'));
-  my $magic = cook_int($q->param('magic'));
+  my $magic = $q->param('magic'); # The CGI object should always have the latest magic because it is set in refresh_session
 
-  my $sth = $dbh->prepare("select magic from users where id=?");
-  $sth->execute($uid);
-  my ($nextmagic) = $sth->fetchrow_array;
-
-  return "<input type='hidden' name='uid' value='$uid'>\n<input type='hidden' name='magic' value='$nextmagic'>\n";
+  return "<input type='hidden' name='uid' value='$uid'>\n<input type='hidden' name='magic' value='$magic'>\n";
 }
 
 sub session_expired {

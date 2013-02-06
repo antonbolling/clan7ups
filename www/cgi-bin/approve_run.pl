@@ -71,8 +71,27 @@ EOT
 
   }
 
+	approve_runners($dbh,$q,$view_time,$runid,$zone_name);
+
+  #Set run status to approved
+  $dbh->do("update runs set status='approved' where id=$runid");
+  
+  my $uid = cook_int($q->param('uid'));
+  $sth = $dbh->prepare("select name from users where id=$uid");
+  $sth->execute;
+  my $admin = $sth->fetchrow_array;
+  
+  #Log
+  $dbh->do("insert into log (user,action,idata1,cdata1,bigdata) values($uid,'run',$runid,'approved','$admin APPROVED run #$runid')");
+
+  main_menu($dbh, $q, $view_time);
+}
+
+sub approve_runners {
+  my ($dbh, $q, $view_time, $runid, $zone_name) = @_;
+
   #Get a list of runners for this run.
-  $sth = $dbh->prepare("select runner from run_points_$runid");
+  my $sth = $dbh->prepare("select runner from run_points_$runid");
   $sth->execute;
 
   while (my ($runner) = $sth->fetchrow_array) {
@@ -117,17 +136,4 @@ EOT
 
     $dbh->do("update user_points_$runner set points=points + $award where zone='$zone_name'");
   }
-
-  #Set run status to approved
-  $dbh->do("update runs set status='approved' where id=$runid");
-  
-  my $uid = cook_int($q->param('uid'));
-  $sth = $dbh->prepare("select name from users where id=$uid");
-  $sth->execute;
-  my $admin = $sth->fetchrow_array;
-  
-  #Log
-  $dbh->do("insert into log (user,action,idata1,cdata1,bigdata) values($uid,'run',$runid,'approved','$admin APPROVED run #$runid')");
-
-  main_menu($dbh, $q, $view_time);
 }

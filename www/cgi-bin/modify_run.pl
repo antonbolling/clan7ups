@@ -109,93 +109,7 @@ EOT
     $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin changed run type from $curr_type to $type for run #$runid')");
   }
 
-  # Take cgi parameters 1 at a time, proccess them and update the database appropriately.
-  # 1) Modify userlist.
-  # a) Delete users in 'delete_runner'.
-  my @delete_runners = $q->param('delete_runner');
-
-  my $runners_were_deleted = 0;
-  if (scalar(@delete_runners)) {
-    $runners_were_deleted = 1;
-    @delete_runners = map { cook_word($_) } @delete_runners;
-    my @quoted_delete_runners = map { "'$_'" } @delete_runners;
-    my $delete_runner_string = join ',', @quoted_delete_runners;
-
-    print "<p>Deleting runnerlist: $delete_runner_string</p>\n";
-    print STDERR "run $runid deleting runnerlist: $delete_runner_string\n";
-
-    $dbh->do("delete from run_points_$runid where runner in ($delete_runner_string)");
-
-    #must remove the ''s from the string so we can safely add it to the log
-    my $tmpstring = cook_string2($delete_runner_string);
-    
-    #Log this
-    $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin deleted $tmpstring from run #$runid')");
-  }
-
-  # ADD RUNNERS
-  my $runners = cook_string($q->param('runners'));
-  my @runnerlist = $runners =~ /([a-zA-Z]{2,})/g;
-  @runnerlist = map { lc $_ } @runnerlist;
-
-	my @word_blacklist = qw(press return or abort name status clan afk medlink cle war thi mag legend formation undead corpse in current class sex level lv total levels avt cc tl total players visible to you); # remove a list of common words, making it easier to paste who -z
-	foreach my $word (@word_blacklist) {
-			@runnerlist = grep { !/^$word$/ } @runnerlist;
-	}
-
-  my $runners_were_added = 0;
-
-  foreach (@runnerlist) {
-			$runners_were_added = 1;
-    my $runner = cook_word($_);
-    print "Adding runner $runner to database<br>";
-    print STDERR "run $runid adding runner $runner\n";
-    $dbh->do("insert into run_points_$runid (runner) values ('$runner')");
-    $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin added $runner to run $runid with 0 points')");
-  }
-
-  printf "<p>Done adding runners</p>\n";
-
-	# SET PERCENT ATTENDANCE - update percent_attendance using parameter percent_attendance_$runner
-
-	$sth = $dbh->prepare("select runner from run_points_$runid");
-	$sth->execute;
-	
-	if ($sth->rows) {
-			my $sta = $dbh->prepare("select percent_attendance from run_points_$runid where runner = ?");
-			while (my ($runner) = $sth->fetchrow_array) {
-					print "Checking $runner to update attendance<br>";
-					my $new_percent_attendance = cook_int($q->param("percent_attendance_$runner"));
-					if ($new_percent_attendance) {
-							if ($new_percent_attendance < 1) {
-									print "new attendance provided for $runner was below 1, setting to 1<br>";
-									$new_percent_attendance = 1;
-							} elsif ($new_percent_attendance > 100) {
-									print "new attendance provided for $runner was above 100, setting to 100<br>";
-									$new_percent_attendance = 100;
-							}
-
-							$sta->execute($runner);
-							my $current_percent_attendance = $sta->fetchrow_array;
-							
-							if ($new_percent_attendance != $current_percent_attendance) {
-									$dbh->do("update run_points_$runid set percent_attendance=$new_percent_attendance where runner='$runner'");
-									print " Updating percent attendance for $runner: old: $current_percent_attendance, new: $new_percent_attendance<br>";
-									print STDERR "run $runid updating percent attendance for $runner: old: $current_percent_attendance, new: $new_percent_attendance\n";
-									$dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin changed percent_attendance for $runner to $new_percent_attendance (from $current_percent_attendance) on run #$runid')");
-							}
-					} else {
-							print " Not modifying percent attendance for $runner<br>";
-					}
-			}
-			
-			print "Done modifying runner attendance<br>";
-			$sta->finish;
-	}
-
-	# UPDATE POINTS
-	# update points which may change when runners are added/deleted or attendance is modified
-	set_run_points_for_all_runners_based_on_attendance($dbh,$runid);
+	modify_runners($dbh,$q,$view_time,$runid,$uid,$admin);
 
 	# ITEMS
 
@@ -288,3 +202,97 @@ EOT
     main_menu($dbh, $q, $view_time);
   }
 }
+
+sub modify_runners {
+  my ($dbh, $q, $view_time, $runid, $uid, $admin) = @_;
+
+  # Take cgi parameters 1 at a time, proccess them and update the database appropriately.
+  # 1) Modify userlist.
+  # a) Delete users in 'delete_runner'.
+  my @delete_runners = $q->param('delete_runner');
+
+  my $runners_were_deleted = 0;
+  if (scalar(@delete_runners)) {
+    $runners_were_deleted = 1;
+    @delete_runners = map { cook_word($_) } @delete_runners;
+    my @quoted_delete_runners = map { "'$_'" } @delete_runners;
+    my $delete_runner_string = join ',', @quoted_delete_runners;
+
+    print "<p>Deleting runnerlist: $delete_runner_string</p>\n";
+    print STDERR "run $runid deleting runnerlist: $delete_runner_string\n";
+
+    $dbh->do("delete from run_points_$runid where runner in ($delete_runner_string)");
+
+    #must remove the ''s from the string so we can safely add it to the log
+    my $tmpstring = cook_string2($delete_runner_string);
+    
+    #Log this
+    $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin deleted $tmpstring from run #$runid')");
+  }
+
+  # ADD RUNNERS
+  my $runners = cook_string($q->param('runners'));
+  my @runnerlist = $runners =~ /([a-zA-Z]{2,})/g;
+  @runnerlist = map { lc $_ } @runnerlist;
+
+	my @word_blacklist = qw(press return or abort name status clan afk medlink cle war thi mag legend formation undead corpse in current class sex level lv total levels avt cc tl total players visible to you); # remove a list of common words, making it easier to paste who -z
+	foreach my $word (@word_blacklist) {
+			@runnerlist = grep { !/^$word$/ } @runnerlist;
+	}
+
+  my $runners_were_added = 0;
+
+  foreach (@runnerlist) {
+			$runners_were_added = 1;
+    my $runner = cook_word($_);
+    print "Adding runner $runner to database<br>";
+    print STDERR "run $runid adding runner $runner\n";
+    $dbh->do("insert into run_points_$runid (runner) values ('$runner')");
+    $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin added $runner to run $runid with 0 points')");
+  }
+
+  printf "<p>Done adding runners</p>\n";
+
+	# SET PERCENT ATTENDANCE - update percent_attendance using parameter percent_attendance_$runner
+
+	my $sth = $dbh->prepare("select runner from run_points_$runid");
+	$sth->execute;
+	
+	if ($sth->rows) {
+			my $sta = $dbh->prepare("select percent_attendance from run_points_$runid where runner = ?");
+			while (my ($runner) = $sth->fetchrow_array) {
+					print "Checking $runner to update attendance<br>";
+					my $new_percent_attendance = cook_int($q->param("percent_attendance_$runner"));
+					if ($new_percent_attendance) {
+							if ($new_percent_attendance < 1) {
+									print "new attendance provided for $runner was below 1, setting to 1<br>";
+									$new_percent_attendance = 1;
+							} elsif ($new_percent_attendance > 100) {
+									print "new attendance provided for $runner was above 100, setting to 100<br>";
+									$new_percent_attendance = 100;
+							}
+
+							$sta->execute($runner);
+							my $current_percent_attendance = $sta->fetchrow_array;
+							
+							if ($new_percent_attendance != $current_percent_attendance) {
+									$dbh->do("update run_points_$runid set percent_attendance=$new_percent_attendance where runner='$runner'");
+									print " Updating percent attendance for $runner: old: $current_percent_attendance, new: $new_percent_attendance<br>";
+									print STDERR "run $runid updating percent attendance for $runner: old: $current_percent_attendance, new: $new_percent_attendance\n";
+									$dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'run',$runid,'$admin changed percent_attendance for $runner to $new_percent_attendance (from $current_percent_attendance) on run #$runid')");
+							}
+					} else {
+							print " Not modifying percent attendance for $runner<br>";
+					}
+			}
+			
+			print "Done modifying runner attendance<br>";
+			$sta->finish;
+	}
+
+	# UPDATE POINTS
+	# update points which may change when runners are added/deleted or attendance is modified
+	set_run_points_for_all_runners_based_on_attendance($dbh,$runid);
+}
+
+1;

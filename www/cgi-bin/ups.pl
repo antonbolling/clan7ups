@@ -43,7 +43,7 @@ EOT
 
 #print "<p> Updating session info... PASSED uid, magic: $uid, $magic. view_time is $view_time. </p>\n";
 
-if (get_session($dbh, $q, $view_time)) {
+if (refresh_session($dbh, $q, $view_time)) {
   # Switch on action flag.
   my $action = $q->param('action');
   #print "<p>Found action parameter: $action</p>\n";
@@ -188,8 +188,6 @@ if (get_session($dbh, $q, $view_time)) {
 	} elsif ($action eq 'modify_approved_run') {
 			require "modify_approved_run.pl";
 			modify_approved_run($dbh,$q,$view_time);
-			require "main_menu.pl";
-			main_menu($dbh, $q, $view_time);
 	} elsif ($action eq 'recent_runs_gui') {
 			require "recent_runs.pl";
 			recent_runs_gui($dbh, $q, $view_time);

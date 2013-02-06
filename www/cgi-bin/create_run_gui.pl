@@ -68,9 +68,8 @@ EOT
     <input type="submit" value="Submit this run">
   </form>
 	<br>
-	Or, Cancel:
 EOT
-  return_main($dbh,$q,$view_time);
+  return_main2($session_info,"Cancel");
 print <<EOT;
   <hr>
   <h3> How to use this dialog </h3>

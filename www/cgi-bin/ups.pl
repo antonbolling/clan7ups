@@ -197,6 +197,9 @@ if ($magic = get_session($dbh, $q, $view_time)) {
 			modify_approved_run($dbh,$q,$view_time);
 			require "main_menu.pl";
 			main_menu($dbh, $q, $view_time);
+	} elsif ($action eq 'recent_runs_gui') {
+			require "recent_runs.pl";
+			recent_runs_gui($dbh, $q, $view_time);
 	}
 } else {
   session_expired();

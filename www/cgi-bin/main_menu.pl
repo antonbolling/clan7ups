@@ -13,7 +13,6 @@ require "points.pl";
 require "cook.pl";
 require "time_string.pl";
 require "pickable.pl";
-require "recent_runs.pl";
 
 my $one_day = 86400;
 my $three_days = 259200;
@@ -72,7 +71,6 @@ EOT
 
   display_notifications($dbh, $session_info, $uid);
 
-	print recent_runs($dbh, $login, $access, $session_info);
 
   # User: Display pickable and waiting eq from store.
   list_bids($dbh, $q, $view_time);
@@ -304,6 +302,7 @@ $session_info
 <select name="action">
 <option value="create_run_gui">Submit a run
 <option value="user_info_gui">Modify your user info
+<option value="recent_runs_gui">View recent runs
 <option value="user_transfer_points_gui">Transfer points to another user
 EOT
 

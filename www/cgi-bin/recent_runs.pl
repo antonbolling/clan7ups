@@ -4,12 +4,20 @@ use strict;
 use CGI;
 use DBI;
 
-# Return a string containing recent runs
-# in html, suitable for printing into the page.
+require "session.pl";
+require "user.pl";
+require "ups_util.pl";
+require "time_string.pl";
+
+# Print a gui containing recent runs
 #  - render the runs from the point-of-view of the passed user_name,
 #     showing whether the user was in each run, or not
-sub recent_runs {
-		my ($dbh, $user_name, $user_access_level, $session_info) = @_;
+sub recent_runs_gui {
+		my ($dbh, $q, $view_time) = @_;
+		my $session_info = get_session_info($dbh, $q, $view_time);
+		my $user_id = $q->param('uid');
+		my $user_name = get_user_name_by_id($dbh,$user_id);
+		my $user_access_level = get_access($dbh, $q, $view_time);
 
 		my $recent_runs_admin_mode = 0;
 		if ($user_access_level eq 'gate' or $user_access_level eq 'admin') {
@@ -96,7 +104,8 @@ EOT
 				}
 		}
 
-		return $html;
+		print $html;
+		return_main2($session_info);
 }
 
 

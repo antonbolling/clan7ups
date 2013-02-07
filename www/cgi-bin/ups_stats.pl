@@ -42,6 +42,17 @@ sub ups_points_stats {
 
 		$html .= "Total points in system: $total_points<br>";
 
+		my $total_bids_sql = $dbh->prepare("select sum(bid) from bid_eq where status = 'bidding'");
+		$total_bids_sql->execute;
+		
+		my ($total_bids) = $total_bids_sql->fetchrow_array;
+
+		$html .= "Total outstanding bids: $total_bids<br>";
+
+		my $total_points_banked = $total_points - $total_bids;
+
+		$html .= "Total points banked (total - bid): $total_points_banked<br>";
+
 		return $html;
 }
 

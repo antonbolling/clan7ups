@@ -200,6 +200,9 @@ if ($magic = get_session($dbh, $q, $view_time)) {
 	} elsif ($action eq 'recent_runs_gui') {
 			require "recent_runs.pl";
 			recent_runs_gui($dbh, $q, $view_time);
+	} elsif ($action eq 'ups_stats_gui') {
+			require "ups_stats.pl";
+			ups_stats_gui($dbh, $q, $view_time);
 	}
 } else {
   session_expired();

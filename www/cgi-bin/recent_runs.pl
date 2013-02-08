@@ -33,7 +33,7 @@ sub recent_runs_gui {
 		my $html = <<EOT;
 		  <hr>
 		  <h3>All Recent Runs</h3>
-      <i>Pending</i> runs aren't on UPS yet - you won't see points or eq from a pending run.<br><br>
+      <span style='background-color:yellow;'><i>Pending</i></span> runs aren't on UPS yet - you won't see points or eq from a pending run.<br><br>
 EOT
 
     if ($at_least_one_run ) {
@@ -49,7 +49,7 @@ EOT
 
 				$html .= <<EOT;
 		  <table>
-			<tr>$modify_run_column_html<td>Zone</td><td>Day</td><td>Leader</td><td>Status</td><td>Age</td><td>On Run?</td></tr>
+			<tr>$modify_run_column_html<td>Zone</td><td>Day</td><td>Leader</td><td>Status</td><td>Age</td><td>On Run?</td><td>Your Points</td><td>Your Attendance</td></tr>
 EOT
     } else {
 				$html .= "(No recent runs)";
@@ -61,14 +61,22 @@ EOT
 		while (my ($run_id, $zone_name, $day_id, $leader, $run_status, $run_age) = $recent_runs_sql->fetchrow_array) {
 				my $day_name = get_day_name($dbh, $zone_name, $day_id);
 				$run_age = time_string($run_age);
+
+				if ($run_status eq 'pending') {
+						$run_status = "<span style='background-color:yellow;'>$run_status</span>";
+				}
 				
-				my $was_user_on_run_sql = $dbh->prepare("select * from run_points_$run_id where runner = '$user_name'");
+				my $was_user_on_run_sql = $dbh->prepare("select points, percent_attendance from run_points_$run_id where runner = '$user_name'");
 				$was_user_on_run_sql->execute;
 				my $was_user_on_run = $was_user_on_run_sql->rows;
 
 				my $was_user_on_run_html;
+				my $user_run_points = "n/a";
+				my $user_run_attendance = "n/a";
 				if ($was_user_on_run) {
 						$was_user_on_run_html = "<font color=green>you were on this run</font>";
+						($user_run_points, $user_run_attendance) = $was_user_on_run_sql->fetchrow_array;
+						$user_run_attendance = "$user_run_attendance%";
 				} else {
 						$was_user_on_run_html = "<font color=red>you were not on this run</font>";
 				}
@@ -93,6 +101,8 @@ EOT
 						  <td>$run_status</td>
 						  <td>$run_age</td>
 						  <td>$was_user_on_run_html</td>
+							<td>$user_run_points</td>
+							<td>$user_run_attendance</td>
 						</tr>
 EOT
 		}

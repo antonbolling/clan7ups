@@ -10,12 +10,9 @@ require "main_menu.pl";
 require "browser_gui.pl";
 require "ups_util.pl";
 require "points.pl";
-require "pickable.pl";
 require "cook.pl";
 require "time_string.pl";
-
-my $one_day = 86400;
-my $three_days = 259200;
+require "auction_timing.pl";
 
 sub browser {
   my ($dbh, $q, $view_time) = @_;
@@ -86,7 +83,7 @@ sub browser {
 
     # 'pickable' function says bid stamps are such that current bidder can pick this item.
     # get all UNpickable items.
-    my @biddable_eq = grep { !bid_pickable($dbh, $q, $view_time, $_->[0]) } @$data;
+    my @biddable_eq = grep { !auction_pickable($dbh, $_->[0]) } @$data;
     @biddable_eq = map { $_->[0] } @biddable_eq;
     my $num_biddable_items = scalar(@biddable_eq);
 
@@ -176,27 +173,7 @@ EOT
         if ((!$cur_bid_time) or (!$first_bid_time)) {
           $bid_timer = "N/A";
         } else {
-          # Timers defined;
-          my $elapsed_since_add = $view_time - $add_time;
-          my $elapsed_since_bid = $view_time - $cur_bid_time;
-          my $elapsed_start_to_bid = $cur_bid_time - $first_bid_time;
-
-          # ASSUME: timer ends in the future. Otherwise biddable would have returned 0
-          # and the browser would not have displayed the item.
-
-          # if cur bid is more than 3 days after first bid,
-          # timer zeros a day after cur_bid
-          if ($elapsed_start_to_bid > $three_days) {
-            my $timer_ends = $cur_bid_time + $one_day;
-            $bid_timer = $timer_ends - $view_time;
-          }
-          # otherwise, timer zeros 3 days after cur_bid.
-          else {
-            my $timer_ends = $cur_bid_time + $three_days;
-            $bid_timer = $timer_ends - $view_time;
-          }
-
-          $bid_timer = time_string($bid_timer);
+						$bid_timer = time_string(auction_seconds_remaining($view_time,$add_time,$cur_bid_time));
         }
 
         my $points_avail = $zone_highest_bid->{$zone_name};

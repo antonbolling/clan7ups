@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-#08/25/03 - JM - I think pick_store() is obsolete or something, so removed the call
-
 use warnings;
 use strict;
 
@@ -26,7 +24,6 @@ my $q = new CGI;
 print $q->header;
 
 my $uid = $q->param('uid');
-my $magic = $q->param('magic');
 
 my $sth = $dbh->prepare("select unix_timestamp(now())");
 $sth->execute;
@@ -46,7 +43,7 @@ EOT
 
 #print "<p> Updating session info... PASSED uid, magic: $uid, $magic. view_time is $view_time. </p>\n";
 
-if ($magic = get_session($dbh, $q, $view_time)) {
+if (get_session($dbh, $q, $view_time)) {
   # Switch on action flag.
   my $action = $q->param('action');
   #print "<p>Found action parameter: $action</p>\n";
@@ -130,10 +127,6 @@ if ($magic = get_session($dbh, $q, $view_time)) {
   elsif ($action eq 'pick_day') {
     require "pick_day.pl";
     pick_day($dbh, $q, $view_time);
-  }
-  elsif ($action eq 'buy_items') {
-    require "buy_items.pl";
-    buy_items($dbh, $q, $view_time);
   }
   elsif ($action eq 'perform_picks_gui') {
     require "perform_picks_gui.pl";

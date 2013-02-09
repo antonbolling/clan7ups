@@ -7,7 +7,7 @@ use warnings;
 require "cook.pl";
 require "main_menu.pl";
 require "session.pl";
-require "pickable.pl";
+require "auction_timing.pl";
 require "ups_util.pl";
 
 sub allocate_pick_gui {
@@ -44,7 +44,7 @@ EOT
   }
 
   # Check that this item is pickable and $uid has current maxbid
-  my $pickable = bid_pickable($dbh, $q, $view_time, $eqid);
+  my $pickable = auction_pickable($dbh, $eqid);
   $sth = $dbh->prepare("select bidder from bid_eq where id=$eqid");
   $sth->execute;
   my $item_exists = $sth->rows;

@@ -12,10 +12,7 @@ require "session.pl";
 require "points.pl";
 require "cook.pl";
 require "time_string.pl";
-require "pickable.pl";
-
-my $one_day = 86400;
-my $three_days = 259200;
+require "auction_timing.pl";
 
 # Display:
 # -- All equipment this user can pick with links to the allocate script.
@@ -70,7 +67,6 @@ EOT
   list_runs_user($dbh, $q, $view_time);
 
   display_notifications($dbh, $session_info, $uid);
-
 
   # User: Display pickable and waiting eq from store.
   list_bids($dbh, $q, $view_time);
@@ -227,71 +223,6 @@ EOT
   }
 }
 
-# Standing bid is more than 3 days old.
-# Standing bid was placed 3+ days after add stamp and is 1+ day old.
-sub list_pickable_eq {
-  my ($dbh, $q, $view_time) = @_;
-
-  # No op.
-  return 1;
-
-  my $session_info = get_session_info($dbh, $q, $view_time);
-  my $uid = cook_int($q->param('uid'));
-
-  my $sth = $dbh->prepare("select id,descr,days,bid from eq where bidder=$uid and bid_type=\"bid\" and ((UNIX_TIMESTAMP(now())-UNIX_TIMESTAMP(cur_bid_time) > $three_days) or (UNIX_TIMESTAMP(now())-UNIX_TIMESTAMP(cur_bid_time) > $one_day and UNIX_TIMESTAMP(now())-UNIX_TIMESTAMP(first_bid_time) > $three_days))");
-  $sth->execute;
-
-  my $pickable_bid_items = $sth->fetchall_arrayref;
-  my $number_bid_items = scalar(@$pickable_bid_items);
-
-  # Probably won't happen much, but check for half finished buy system picks.
-  $sth = $dbh->prepare("select id,descr,days,bid from eq where bidder=$uid and bid_type='buy'");
-  $sth->execute;
-  my $pickable_buy_items = $sth->fetchall_arrayref;
-  my $number_buy_items = scalar(@$pickable_buy_items);
-
-  my $number_pickable_items = $number_bid_items + $number_buy_items;
-
-  # display pickable items with an allocator link.
-  if ($number_pickable_items > 0) {
-    print <<EOT;
-    <h3>Allocate points for your <bold>$number_pickable_items</bold> picks</h3>
-    <form method=post action=/cgi-bin/pickitem.pl>
-    <table>
-      <tr><td></td><td>ID</td><td>Description</td><td>Days</td><td>Bid</td></tr>
-
-      $session_info;
-EOT
-	
-    foreach (@$pickable_bid_items) {
-      my ($item_id, $item_descr, $item_days, $item_bid) = @$_;
-
-      if (!$item_days) {
-	$item_days = "N/A";
-      }
-
-      print <<EOT;
-
-      <tr>
-      <td><input type="radio" name="pick" value="$item_id"></td>
-      <td>$item_id</td>
-      <td>$item_descr</td>
-      <td>$item_days</td><td>$item_bid</td>
-      </tr>
-
-EOT
-
-    }
-    print <<EOT;
-    </table>
-
-    <input type="submit" value="Pick!">
-    </form>
-    <hr>
-EOT
-  }
-}
-
 sub select_action {
   my ($dbh, $q, $view_time) = @_;
   my $session_info = get_session_info($dbh, $q, $view_time);
@@ -381,7 +312,6 @@ sub list_bids {
   $sth->execute;
   my ($login) = $sth->fetchrow_array;
 
-  # OK. Now. Get all entries in store_eq that have buyer='$login'.
   $sth = $dbh->prepare("select id from bid_eq where bidder='$login' and status='bidding'");
   $sth->execute;
   my $num_items = $sth->rows;
@@ -395,7 +325,7 @@ sub list_bids {
   foreach $item (@$data) {
     my $eqid = $item->[0];
 
-    if (bid_pickable($dbh, $q, $view_time, $eqid)) {
+    if (auction_pickable($dbh, $eqid)) {
       push @pickable_bids, $eqid;
     }
     else {
@@ -421,20 +351,14 @@ EOT
 
       my $in_list = join ',', @waiting_bids;
 
-      $sth = $dbh->prepare("select id,bid,descr,UNIX_TIMESTAMP(first_bid_time),UNIX_TIMESTAMP(cur_bid_time) from bid_eq where id in ($in_list) order by cur_bid_time");
+      $sth = $dbh->prepare("select id,bid,descr,UNIX_TIMESTAMP(add_time),UNIX_TIMESTAMP(cur_bid_time) from bid_eq where id in ($in_list) order by cur_bid_time");
       $sth->execute;
       $data = $sth->fetchall_arrayref;
 
       foreach $item (@$data) {
-        my ($eqid, $bid, $descr, $first_bid_time, $cur_bid_time) = @$item;
+        my ($eqid, $bid, $descr, $add_time, $cur_bid_time) = @$item;
 
-        my $time_first_to_cur = $cur_bid_time - $first_bid_time;
-        my $three_days_after_cur = $cur_bid_time + $three_days;
-        my $one_day_after_cur = $cur_bid_time + $one_day;
-
-        my $timer_expires = $time_first_to_cur > $three_days ? $one_day_after_cur : $three_days_after_cur;
-        my $timer_seconds = $timer_expires - $view_time;
-        my $timer = time_string($timer_seconds);
+				my $timer = time_string(auction_seconds_remaining($view_time,$add_time,$cur_bid_time));
 
         print <<EOT
         <tr>

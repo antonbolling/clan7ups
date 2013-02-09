@@ -14,9 +14,7 @@ require "time_string.pl";
 require "ups_util.pl";
 require "bid_item_gui.pl";
 require "user_notifications.pl";
-
-my $one_day = 86400;
-my $three_days = 259200;
+require "auction_timing.pl";
 
 sub bid_item {
   my ($dbh, $q, $view_time) = @_;
@@ -64,14 +62,9 @@ EOT
     print "<p>Looks like you're the first to place a bid on this item. Continuing...</p>";
   }
   else {
-    my $time_first_to_cur = $cur_bid_time - $first_bid_time;
-    my $three_days_after_cur = $cur_bid_time + $three_days;
-    my $one_day_after_cur = $cur_bid_time + $one_day;
+		my $timer_seconds = auction_seconds_remaining($view_time,$add_time,$cur_bid_time);
 
-    my $timer_expires = $time_first_to_cur > $three_days ? $one_day_after_cur : $three_days_after_cur;
-    my $timer_seconds = $timer_expires - $view_time;
-
-    if ($timer_seconds <= 0) {
+    if ($timer_seconds < 1) {
       print "<p>ERROR: Oops, it looks like the timer for that item expired! Returning to main...</p>\n";
       main_menu($dbh, $q, $view_time);
       return 1;

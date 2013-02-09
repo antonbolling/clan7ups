@@ -7,7 +7,7 @@ use strict;
 require "main_menu.pl";
 require "ups_util.pl";
 require "points.pl";
-require "pickable.pl";
+require "auction_timing.pl";
 require "cook.pl";
 require "time_string.pl";
 require "revalue_gui.pl";
@@ -81,7 +81,7 @@ EOT
 
   # 'pickable' function says bid stamps are such that current bidder can pick this item.
   # get all UNpickable items.
-  my @biddable_eq = grep { !bid_pickable($dbh, $q, $view_time, $_->[0]) } @$data;
+  my @biddable_eq = grep { !auction_pickable($dbh, $_->[0]) } @$data;
   @biddable_eq = map { $_->[0] } @biddable_eq;
   my $num_biddable_items = scalar(@biddable_eq);
 

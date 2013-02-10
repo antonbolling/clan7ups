@@ -10,6 +10,7 @@ require "main_menu.pl";
 require "time_string.pl";
 require "ups_util.pl";
 require "auction_timing.pl";
+require "ups_config.pl";
 
 sub bid_item_gui {
   my ($dbh, $q, $view_time) = @_;
@@ -22,6 +23,15 @@ sub bid_item_gui {
   my $session_info = get_session_info($dbh, $q, $view_time);
 
   my $bid_item_num = cook_int($q->param('bid_item'));
+
+  if (!config_enable_bidding($dbh)) {
+			print <<EOT;
+      <h3>Oh noes, bidding is currently disabled.  Sorry... have a kitten</h3>
+			<img src="http://placekitten.com/300/300">
+EOT
+			main_menu($dbh, $q, $view_time);
+			return 1;
+	}
 
   if (!$bid_item_num) {
     print <<EOT;

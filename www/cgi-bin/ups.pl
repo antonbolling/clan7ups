@@ -196,7 +196,19 @@ if (get_session($dbh, $q, $view_time)) {
 	} elsif ($action eq 'ups_stats_gui') {
 			require "ups_stats.pl";
 			ups_stats_gui($dbh, $q, $view_time);
-	}
+	}	elsif ($action eq 'ups_config_gui') {
+			require "ups_config.pl";
+			if (ups_config_gui($dbh,$q,$view_time)) {
+					require "main_menu.pl";
+					main_menu($dbh, $q, $view_time);
+			}
+	} elsif ($action eq 'set_ups_config') {
+			require "ups_config.pl";
+			if (set_ups_config($dbh,$q,$view_time)) {
+					require "main_menu.pl";
+					main_menu($dbh, $q, $view_time);
+			}
+  } 
 } else {
   session_expired();
 }

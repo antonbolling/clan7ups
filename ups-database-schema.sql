@@ -117,3 +117,9 @@ CREATE TABLE user_notifications (
     ON UPDATE CASCADE,
   PRIMARY KEY  (id)
 );
+
+CREATE TABLE config (
+  config_key varchar(120) NOT NULL,
+	config_value text,
+	PRIMARY KEY (config_key)
+);

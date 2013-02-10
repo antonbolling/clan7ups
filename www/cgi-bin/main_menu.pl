@@ -251,6 +251,7 @@ EOT
   if ($access eq 'admin') {
     print <<EOT;
 <option value="ups_stats_gui">View ups stats
+<option value="ups_config_gui">Ups config
 <option value="mod_create_zone_gui">Modify zone info
 <option value="adv_user_gui">Advanced user management
 <option value="add_items_start_gui">Transfer new equipment to the system - BROKEN

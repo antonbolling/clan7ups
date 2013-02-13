@@ -53,17 +53,17 @@ if ($sth->rows) {
 }
 
 #login is real, check the password
-$sth = $dbh->prepare("select id from users where name='$login' and pass=PASSWORD('$pass')");
-$sth->execute;
+my $login_sql = $dbh->prepare("select id from users where name=? and pass=PASSWORD(?)");
+$login_sql->execute($login,$pass);
 
-my $valid_login = $sth->rows;
-my ($uid) = $sth->fetchrow_array;
+my $valid_login = $login_sql->rows;
+my ($uid) = $login_sql->fetchrow_array;
 
 if ($valid_login) {
   # Login was valid, get the current time.
-  my $sth = $dbh->prepare("select unix_timestamp(now())");
-  $sth->execute;
-  my ($time) = $sth->fetchrow_array;
+  my $time_sql = $dbh->prepare("select unix_timestamp(now())");
+  $time_sql->execute;
+  my ($time) = $time_sql->fetchrow_array;
 
   my $magic = new_session($dbh, $uid);
   my $CGI_params = $q->Vars;

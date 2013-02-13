@@ -17,8 +17,10 @@ sub new_session {
   # Make sequence numbers random.
   my $magic = int rand(2147483648);
 
-  $dbh->do("update users set magic=$magic where id=$uid");
-  $dbh->do("update users set session_stamp=now() where id=$uid");
+  my $sql = $dbh->prepare("update users set magic=? where id=?");
+	$sql->execute($magic,$uid);
+  $sql = $dbh->prepare("update users set session_stamp=now() where id=?");
+	$sql->execute($uid);
 
   return $magic;
 }
@@ -34,8 +36,8 @@ sub get_session {
 
 #  print "<p>PASSED uid, magic: $uid, $cgi_magic</p>";
 
-  my $sth = $dbh->prepare("select magic, UNIX_TIMESTAMP(now())-UNIX_TIMESTAMP(session_stamp) as elapsed from users where id=$uid");
-  $sth->execute;
+  my $sth = $dbh->prepare("select magic, UNIX_TIMESTAMP(now())-UNIX_TIMESTAMP(session_stamp) as elapsed from users where id=?");
+  $sth->execute($uid);
   my ($db_magic, $elapsed) = $sth->fetchrow_array;
 
 #  print "<p>FOUND magic, elapsed: $db_magic, $elapsed</p>\n";
@@ -43,12 +45,9 @@ sub get_session {
   if (($db_magic == $cgi_magic) and ($elapsed < $session_timeout)) {
     # Set a new session timestamp, update magic.
     my $new_magic = int rand(2147483648);
-    $dbh->do("update users set session_stamp=now(), magic=$new_magic where id=$uid");
+    my $sql = $dbh->prepare("update users set session_stamp=now(), magic=? where id=?");
+		$sql->execute($new_magic,$uid);
 
-    # Put magic into cgi query.
-#    my $vars = $q->Vars;
-#    $vars->{'magic'} = $new_magic;
-    # Successfully continued session...
     return 1;
   }
   else {
@@ -63,8 +62,8 @@ sub get_access {
   my ($dbh, $q, $view_time) = @_;
   my $uid = cook_int($q->param('uid'));
 
-  my $sth = $dbh->prepare("select access from users where id=$uid");
-  $sth->execute;
+  my $sth = $dbh->prepare("select access from users where id=?");
+  $sth->execute($uid);
   my ($access) = $sth->fetchrow_array;
 
   return $access;
@@ -76,8 +75,8 @@ sub no_access {
   my $action = cook_word($q->param('action'));
 
   # Log it.
-  my $sth = $dbh->prepare("insert into log (user,action,cdata1) values($uid,'accessdenied','$action')");
-  $sth->execute;
+  my $sth = $dbh->prepare("insert into log (user,action,cdata1) values(?,'accessdenied','$action')");
+  $sth->execute($uid);
 
   # Notify the user.
   print <<EOT;
@@ -96,8 +95,8 @@ sub get_session_info {
   my $uid = cook_int($q->param('uid'));
   my $magic = cook_int($q->param('magic'));
 
-  my $sth = $dbh->prepare("select magic from users where id=$uid");
-  $sth->execute;
+  my $sth = $dbh->prepare("select magic from users where id=?");
+  $sth->execute($uid);
   my ($nextmagic) = $sth->fetchrow_array;
 
   return "<input type='hidden' name='uid' value='$uid'>\n<input type='hidden' name='magic' value='$nextmagic'>\n";

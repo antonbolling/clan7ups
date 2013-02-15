@@ -122,7 +122,7 @@ EOT
       if ($this_zone_alloc > $avail) {
         print <<EOT;
         </ul>
-        <p>ERROR: You only have $avail available $zone_name points, but you told us to use $points.
+        <p>ERROR: You only have $avail available $zone_name points, but you told us to use $this_zone_alloc.
            starting over.
 EOT
         allocate_pick_gui($dbh, $q, $view_time);

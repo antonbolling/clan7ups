@@ -3,6 +3,7 @@ use DBI;
 use warnings;
 use strict;
 
+require "db.pl";
 require "adv_points.pl";
 require "points.pl";
 require "user.pl";
@@ -82,13 +83,13 @@ sub user_transfer_points {
 					print STDERR "$receiving_user_name already had $zone_name points, don't need to create an $zone_name record\n";
 	    }
 
-			$dbh->{AutoCommit} = 0;
+			begin_transaction($dbh);
 			$dbh->do("update user_points_$user_name set points = points - $points_to_send where zone = '$zone_name'");
 			$dbh->do($create_zone_points_for_receiving_user_sql);
 			$dbh->do("update user_points_$receiving_user_name set points = points + $points_to_send where zone = '$zone_name'");
       $dbh->do("insert into log (user,action,bigdata) values($user_id,'transfer','transferred $points_to_send $zone_name points from $user_name to $receiving_user_name')");
 			$dbh->commit;
-			$dbh->{AutoCommit} = 1;
+			end_transaction($dbh);
 
 			create_notification_by_user_id($dbh, $user_id, "<form> You sent $points_to_send $zone_name points to $receiving_user_name.");
 			create_notification_by_user_id($dbh, $receiving_user_id, "<form> $user_name sent you $points_to_send $zone_name points.");

@@ -29,3 +29,16 @@ sub get_db {
 
 		return $dbh;
 }
+
+sub begin_transaction {
+		my ($dbh) = @_;
+		$dbh->{AutoCommit} = 0;
+}
+
+sub end_transaction {
+		my ($dbh) = @_;
+		$dbh->commit;
+		$dbh->{AutoCommit} = 1;
+}
+
+1;

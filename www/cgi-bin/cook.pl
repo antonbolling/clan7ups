@@ -9,14 +9,16 @@ sub cook_int {
 
   my $int;
 
-  if ($input =~ /(\d+)/) {
+	if (!defined $input) {
+		$int = undef;
+	} elsif ($input =~ /(-?\d+)/) {
     $int = $1;
   }
   else {
     $int = undef;
   }
 
-#  print "Cookint returning $int";
+#  print STDERR "Cookint returning $int\n";
   return $int;
 }
 

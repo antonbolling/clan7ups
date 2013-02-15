@@ -13,6 +13,7 @@ require "session.pl";
 require "auction_timing.pl";
 require "ups_util.pl";
 require "allocate_pick_gui.pl";
+require "points.pl";
 
 sub allocate_pick {
   my ($dbh, $q, $view_time) = @_;
@@ -94,6 +95,14 @@ EOT
 
   my $remaining_alloc = $bid - $min_alloc;
 
+  my $item_zone_points = get_zone_points_from_username($dbh, $login, $zone);
+	if ($item_zone_points < $min_alloc) {
+			print <<EOT;
+    <p>ERROR: You do not have enough $zone points to pick this item right now. You have $item_zone_points $zone points available. You need $min_alloc. Try again when you have more $zone points.</p>
+EOT
+    main_menu($dbh, $q, $view_time);
+    return 1;
+	}
 
   print <<EOT;
   <p>Trying to allocate for item: $descr.</p>

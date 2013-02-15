@@ -49,6 +49,11 @@ sub user_transfer_points {
 					next;
 			}
 
+			if ($points_to_send < 1) {
+					print "Skipping points transfer for $zone_name, you must send at least 1 point<br>";
+					next;
+			}
+
 			if ($already_transferred_points) {
 					print "Skipping points transfer for $zone_name, you may only transfer points for one zone at a time...<br>";
 					next;

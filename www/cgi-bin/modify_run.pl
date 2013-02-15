@@ -230,6 +230,7 @@ EOT
 #      print "<p>found eqid $eqid</p>\n";
 
       my $value = cook_int($q->param("value_$eqid"));
+			if ($value < 0) { $value = 0; } # Disallow negative minimum bids
       #my $type = cook_word($q->param("type_$eqid"));
       $dbh->do("update incoming_eq set value='$value' where id=$eqid");
       $dbh->do("update incoming_eq set type='bid' where id=$eqid");

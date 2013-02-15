@@ -129,6 +129,15 @@ sub get_zone_points {
   return $zone_points ? $zone_points : 0
 }
 
+# Return the number of points the passed username has in the passed zone.
+sub get_zone_points_from_username {
+		my ($dbh, $username, $zone) = @_;
+		my $sth = $dbh->prepare("select points from user_points_$username where zone = ?");
+		$sth->execute($zone);
+		my ($points) = $sth->fetchrow_array;
+		return $points ? $points : 0;
+}
+
 # Takes: zone name, delta. positive or negative.
 # Returns: new point value.
 sub modify_zone_points {

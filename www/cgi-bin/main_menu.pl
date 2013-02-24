@@ -269,17 +269,23 @@ EOT
 sub display_notifications {
   my ($dbh, $session_info, $uid) = @_;
 
-	my $notifications_sql = $dbh->prepare("select notification from user_notifications where user_id = ?");
+	my $notifications_sql = $dbh->prepare("select id, notification from user_notifications where user_id = ?");
   $notifications_sql->execute($uid);
 
   my $at_least_one_notification = 0;
 
 	my $rendered_notifications = "";
 
+	my $notification_ids = "";
+
   # BY CONVENTION, ALL NOTIFICATIONS MUST be a string containing a html form omitting a trailing </form> tag. main_menu.pl will append the </form> tag with the proper session_info
   while (my $notification_row = $notifications_sql->fetchrow_arrayref) {
 			$at_least_one_notification = 1;
-			my $notification = $notification_row->[0];
+
+			my $notification_id = $notification_row->[0];
+			$notification_ids .= $notification_id . " ";
+
+			my $notification = $notification_row->[1];
       $rendered_notifications .= <<EOT;
 			<div class="user-notification">
 					$notification
@@ -296,6 +302,7 @@ EOT
 			$rendered_notifications
 			<form method="post" name="clear_notifications" action="/cgi-bin/ups.pl">
 					<input type="hidden" name="action" value="clear_notifications">
+					<input type="hidden" name="notification_ids" value="$notification_ids">
 					$session_info
 					<input type="submit" value="Clear Notifications">
 					</form>

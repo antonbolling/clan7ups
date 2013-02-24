@@ -166,7 +166,7 @@ if (refresh_session($dbh, $q, $view_time)) {
   }
 	elsif ($action eq 'clear_notifications') {
 			require "user_notifications.pl";
-			clear_notifications_by_user_id($dbh, $uid);
+			clear_notifications_by_user_id($dbh, $uid, $q->param('notification_ids'));
 			require "main_menu.pl";
 			main_menu($dbh, $q, $view_time);
 	}	

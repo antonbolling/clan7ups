@@ -20,7 +20,9 @@ sub create_notification_by_user_id {
 }
 
 sub clear_notifications_by_user_id {
-		my ($dbh, $user_id) = @_;
-		my $clear_notifications_sql = $dbh->prepare("delete from user_notifications where user_id = ?");
-		$clear_notifications_sql->execute($user_id);
+		my ($dbh, $user_id, $notification_ids) = @_;
+		print STDERR "clear_notifications_by_user_id, user_id $user_id, notification ids $notification_ids\n";
+		my @notification_ids = split(' ', $notification_ids);
+		my $clear_notifications_sql = $dbh->prepare('delete from user_notifications where user_id = ? and id in (' . join( ',', map { '?' } @notification_ids ) . ')');
+		$clear_notifications_sql->execute($user_id, @notification_ids);
 }

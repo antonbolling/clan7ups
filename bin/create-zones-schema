@@ -62,9 +62,9 @@ end
 ################################
 # 'Hours System' assign zone points based on # of hours it takes with one full formation
 
-POINTS_PER_HOUR = 5040 # 5040 chosen as a highly divisible number for when splitting points among runners
+POINTS_PER_HOUR = 504000 # 5040 chosen as a highly divisible number for when splitting points among runners
 
-DEFAULT_PERCENT = 10 # Default zone to 25% points required to pick from that zone
+DEFAULT_PERCENT = 10
 
 def points hours
   (POINTS_PER_HOUR * hours).to_i
@@ -81,71 +81,89 @@ end
 
 ZONES = []
 
-ZONES << simple_zone("kalata",1)
-ZONES << simple_zone("lyryanoth",1)
-ZONES << simple_zone("coliseum",1.25)
-ZONES << simple_zone("condemned",1)
-ZONES << simple_zone("eldricks",0.75)
-ZONES << simple_zone("verigaard",1)
-ZONES << simple_zone("den",0.75)
-ZONES << simple_zone("reclasta",1)
+ZONES << simple_zone("alps",1)
+ZONES << simple_zone("kalata",0.75)
+ZONES << simple_zone("lyryanoth",0.75)
+ZONES << simple_zone("coliseum",0.75)
+ZONES << simple_zone("condemned",0.75)
+ZONES << simple_zone("eldricks",0.5)
+ZONES << simple_zone("verigaard",0.75)
+ZONES << simple_zone("den",0.5)
+ZONES << simple_zone("reclasta",0.75)
 ZONES << simple_zone("sevoseth",1)
 ZONES << simple_zone("dlujik",0.5)
-ZONES << simple_zone("pallens",0.5)
-ZONES << simple_zone("undeadforest",1.5)
-ZONES << simple_zone("vondarkla",1.5)
+ZONES << simple_zone("pallens",0.17)
 
 ZONES << begin
-           alps = simple_zone 'alps', 1
-           alps.percent = 100
-           alps
+           undead = Zone.new 'undeadforest', DEFAULT_PERCENT
+           undead.add_day 'full run', points(1)
+           undead.add_day '(removed feral only)', points(0)
+           undead
+         end
+
+ZONES << begin
+           vond = Zone.new 'vondarkla', DEFAULT_PERCENT
+           vond.add_day 'full run', points(0.75)
+           vond.add_day 'tufts only', points(0)
+           vond
          end
 
 ZONES << begin
            estate = Zone.new 'estate', DEFAULT_PERCENT
-           estate.add_day 'everything but count and nemesis', points(0.5)
-           estate.add_day 'only count', points(0.5)
-           estate.add_day 'only nemesis', points(0.25)
+           estate.add_day 'all but count/nem', points(0.5)
+           estate.add_day 'only nemesis', points(0.17)
+           estate.add_day 'all but nemesis', points(0.75)
+           estate.add_day 'all but count', points(0.67)
+           estate.add_day 'entire zone', points(0.92)
            estate
          end
 
 ZONES << begin
-           ely = Zone.new 'elysium', 100
-           ely.add_day 'day 1', points(2)
-           ely.add_day 'day 2', points(2)
+           ely = Zone.new 'elysium', DEFAULT_PERCENT
+           ely.add_day 'day 1', points(1.5)
+           ely.add_day 'day 2', points(1.5)
            ely
          end
 
 ZONES << begin
            tomb = Zone.new 'tomb', DEFAULT_PERCENT
-           tomb.add_day 'day 1', points(0.75)
+           tomb.add_day 'day 1', points(0.4166)
            tomb.add_day 'bronze', points(1)
            tomb.add_day 'silver', points(1)
-           tomb.add_day 'gold', points(1.25)
+           tomb.add_day 'gold', points(1)
            tomb
          end
 
 ZONES << begin
-           df = Zone.new 'demonforge', 100
-           df.add_day 'kanch only', points(0.4)
-           df.add_day 'kanch + extras', points(0.75)
-           df.add_day 'full day 1', points(1.5)
-           df.add_day 'thg', points(4.5)
+           df = Zone.new 'demonforge', DEFAULT_PERCENT
+           df.add_day 'kanch only', points(0.25)
+           df.add_day 'all but dhaul', points(1)
+           df.add_day 'full with dhaul', points(1.33)
+           df.add_day 'only dhaul', points(0.33)
            df
          end
 
 ZONES << begin
-           stone = Zone.new 'bloodstone', 100
-           # Bloodstone day 1 and 2 get an hours bonus for CPK risk
-           stone.add_day 'day 1', points(1.5)
-           stone.add_day 'day 2', points(2)
-           stone.add_day 'day 3', points(1)
-           stone.add_day 'day 4', points(2)
+           stone = Zone.new 'bloodstone', DEFAULT_PERCENT
+           stone.add_day 'day 1', points(0.75)
+           stone.add_day 'day 2', points(1)
+           stone.add_day 'day 3', points(0.75)
+           stone.add_day 'day 4', points(1.5)
            stone.add_day 'lloth', points(0.3)
-           stone.add_day 'death knight', points(0.5)
-           stone.add_day 'glabrezu', points(0.5)
-           stone.add_day 'drolem', points(0.25)
+           stone.add_day 'death knight', points(0.4)
+           stone.add_day 'glabrezu', points(0.4)
+           stone.add_day '(drolem removed)', points(0)
            stone
+         end
+
+ZONES << begin
+           thg = Zone.new 'thg', DEFAULT_PERCENT
+           thg.add_day 'full run', points(4.5)
+           thg.add_day 'thg up to MD', points(0.675)
+           thg.add_day 'thg up to rosco', points(1.35)
+           thg.add_day 'thg up to tma', points(1.8)
+           thg.add_day 'thg up to niram', points(2.25)
+           thg
          end
 
 ##################################

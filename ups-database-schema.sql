@@ -123,3 +123,12 @@ CREATE TABLE config (
 	config_value text,
 	PRIMARY KEY (config_key)
 );
+
+CREATE TABLE points_deteriorate_log (
+  points_deteriorate_timestamp datetime NOT NULL,
+	deteriorate_halflife_days int(11) NOT NULL,
+	deteriorate_frequency_minutes int(11) NOT NULL,
+	det_rate_for_period int(11) NOT NULL,
+	periods_since_last_det int(11) NOT NULL,
+	PRIMARY KEY (points_deteriorate_timestamp)
+);

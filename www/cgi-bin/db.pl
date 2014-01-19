@@ -4,6 +4,8 @@ use strict;
 
 use DBI;
 
+require "deteriorate_points.pl";
+
 # Change MYSQL_CLIENT_CONFIG to point to your MySQL Client Config file, which shouldn't be in the www directory
 # Example mysql.cnf:
 #
@@ -26,6 +28,8 @@ sub get_db {
 				$dsn, 
 				undef, 
 				undef) or  die "DBI::errstr: $DBI::errstr";
+
+		deteriorate_points($dbh);
 
 		return $dbh;
 }

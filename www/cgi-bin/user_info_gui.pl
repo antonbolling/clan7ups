@@ -31,6 +31,7 @@ sub user_info_gui {
   <tr><td>Repeat</td><td><input type="password" name="newpass2"></td></tr>
   </table>
   <input type="submit" value="Change password">
+  </form>
 EOT
 
   return_main($dbh, $q, $view_time);

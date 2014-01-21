@@ -31,6 +31,8 @@ my ($view_time) = $sth->fetchrow_array;
 
 print <<EOT;
 <head><title>Universal Point System</title>
+<script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="/js/garlic-1.2.2.min.js"></script>
 EOT
 
 print_styles();

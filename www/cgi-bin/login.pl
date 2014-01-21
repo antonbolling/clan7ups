@@ -1,6 +1,4 @@
 #!/usr/bin/perl
-#
-#this is a test of many things, the perl interpreter being one of them.
 
 use warnings;
 use strict;
@@ -9,50 +7,17 @@ use CGI;
 use DBI;
 
 require "session.pl";
-require "main_menu.pl";
 require "cook.pl";
 require "styles.pl";
 require "db.pl";
 
-# Log into the database,
-# Retrieve cgi buffer,
-# Check authentication,
-# Start a new session,
-# Jump to the main menu.
-
 my $dbh = get_db();
 
 my $q = new CGI;
-print $q->header;
 
 my $login = lc cook_word($q->param('login'));
 my $pass = cook_word($q->param('pass'));
 
-print <<EOT;
-<head><title>Universal Point System</title>
-EOT
-
-print_styles();
-
-print <<EOT;
-</head>
-
-<body>
-EOT
-
-print "<p>Trying to log in using login $login</p>\n";
-
-#User names always lowercased.
-#Check if login is an alias
-my $sth = $dbh->prepare("select name from users where aliases like '%$login %'");
-$sth->execute;
-if ($sth->rows) {
-  my ($name) = $sth->fetchrow_array;
-  print "Cannot login using your alias, login with $name instead";
-#  invalid_login($q);
-}
-
-#login is real, check the password
 my $login_sql = $dbh->prepare("select id from users where name=? and pass=PASSWORD(?)");
 $login_sql->execute($login,$pass);
 
@@ -60,7 +25,14 @@ my $valid_login = $login_sql->rows;
 my ($uid) = $login_sql->fetchrow_array;
 
 if ($valid_login) {
-  # Login was valid, get the current time.
+	redirect_to_main_menu($dbh, $q, $uid);
+} else {
+  invalid_login($q, $login);
+}
+
+sub redirect_to_main_menu {
+	my ($dbh, $q, $uid) = @_;
+
   my $time_sql = $dbh->prepare("select unix_timestamp(now())");
   $time_sql->execute;
   my ($time) = $time_sql->fetchrow_array;
@@ -69,18 +41,40 @@ if ($valid_login) {
   my $CGI_params = $q->Vars;
   $CGI_params->{'magic'} = $magic;
   $CGI_params->{'uid'} = $uid;
-  #print "<p>Adding to CGI buffer: magic, $magic; uid, $uid</p>\n";
+  my $session_info = get_session_info($dbh, $q, $time);
 
-  main_menu($dbh, $q, time);
-}
-else {
-  invalid_login($q);
+	print $q->header;
+	print <<EOT;
+	<head>
+	<title>Redirecting to UPS main menu...</title>
+	<script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript">
+	\$(function() {
+			document.body.innerHTML += "<form id='redirectToMainMenu' action='/cgi-bin/ups.pl' method='post'><input type='hidden' name='action' value='main_menu'>$session_info</form>";
+			document.getElementById('redirectToMainMenu').submit();
+		 });
+	</script>
+	</head>
+  <body>
+	SUCCESS.. redirecting to main menu...
+  </body>
+EOT
+  print $q->end_html;
 }
 
 sub invalid_login {
-  my ($q) = @_;
+  my ($q, $login) = @_;
 
+	print $q->header;
+
+	print <<EOT;
+<head><title>Universal Point System</title>
+EOT
+  print_styles();
   print <<EOT;
+</head>
+<body>
+  <p>Trying to log in using login $login</p>
   <p>You entered an invalid username/password pair.</p>
   <p>If you haven't had your account password set, or if this problem continues,
      speak to an administrator. </p>

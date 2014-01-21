@@ -17,8 +17,9 @@ sub browser_gui {
 
   print <<EOT;
     <hr>
+		<div>
     <h3>Search the equipment database</h3>
-    <form name=grep method=post action=/cgi-bin/ups.pl>
+    <form data-persist="garlic" data-domain="true" data-destroy="false" name=grep method=post action=/cgi-bin/ups.pl>
     $session_info
     <input type="hidden" name="action" value="browse">
 
@@ -116,5 +117,6 @@ EOT
 
 	<input type="submit" value="Search">
       </form>
+			</div>
 EOT
 }

@@ -97,7 +97,7 @@ sub get_session_info {
   my $uid = cook_int($q->param('uid'));
   my $magic = $q->param('magic'); # The CGI object should always have the latest magic because it is set in refresh_session
 
-  return "<input type='hidden' name='uid' value='$uid'>\n<input type='hidden' name='magic' value='$magic'>\n";
+  return "<input type='hidden' name='uid' value='$uid'><input type='hidden' name='magic' value='$magic'>";
 }
 
 sub session_expired {

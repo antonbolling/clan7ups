@@ -10,15 +10,61 @@ sub ups_stats_gui {
 		my ($dbh, $q, $view_time) = @_;
 		my $session_info = get_session_info($dbh, $q, $view_time);
 
-		print <<EOT;
+		return_main2($session_info);
+    print <<EOT;
 		<h3>UPS Stats</h3>
 		<table border="1" cellpadding="5">
 EOT
     print ups_points_stats($dbh);
 		print ups_runs_stats($dbh);
 		print "</table>";
+		print ups_points_leaderboard($dbh);
 
 		return_main2($session_info);
+}
+
+sub ups_points_leaderboard {
+		my ($dbh) = @_;
+
+		my $html = "";
+		my $all_user_points_query = "";
+		my $first_user = 1;
+
+		my $sth = $dbh->prepare("select name from users");
+		$sth->execute;
+		while (my ($user_name) = $sth->fetchrow_array) {
+				next if $user_name eq "admin";
+				if ($first_user == 1) {
+						$first_user = 0;
+				} else {
+						$all_user_points_query .= " UNION ALL ";
+				}
+				$all_user_points_query .= "select name,zone,points from user_points_$user_name, users where name = '$user_name'";
+		}
+
+		print STDERR "ups stats, all_user_points_query: $all_user_points_query\n";
+
+		$sth = $dbh->prepare($all_user_points_query);
+		$sth->execute;
+
+		$html .= '<h3>Player Points</h3>';
+		$html .= 'TIP! Sort multiple columns simultaneously by holding down the shift key and clicking a second, third or even fourth column header!<br>';
+		$html .= '<table id="allPlayerPoints" class="tablesorter"><thead><tr><th>Zone</th><th>Player</th><th>Points</th></tr></thead><tbody>';
+		while (my ($user_name, $zone, $points) = $sth->fetchrow_array) { 
+				$html .= "<tr><td>$zone</td><td>$user_name</td><td>$points</td></tr>";
+		}
+		$html .= "</tbody></table>";
+		$html .= <<EOT;
+		<script type='text/javascript'>
+				\$(function() {
+						\$('#allPlayerPoints').tablesorter({ 
+								sortList: [[0,0],[2,1],[1,0]], // sort first column ascending, second column desc, third column asc
+	    					widgets: ['zebra']
+						 });
+					 });
+		</script>
+EOT
+		return $html;
 }
 
 # Return a string containing html render of the UPS points stats

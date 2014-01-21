@@ -235,6 +235,7 @@ $session_info
 <option value="user_info_gui">Modify your user info
 <option value="recent_runs_gui">View recent runs
 <option value="user_transfer_points_gui">Transfer points to another user
+<option value="ups_stats_gui">View ups stats
 EOT
 
   # What access level are we?
@@ -250,7 +251,6 @@ EOT
 
   if ($access eq 'admin') {
     print <<EOT;
-<option value="ups_stats_gui">View ups stats
 <option value="ups_config_gui">Ups config
 <option value="mod_create_zone_gui">Modify zone info
 <option value="adv_user_gui">Advanced user management

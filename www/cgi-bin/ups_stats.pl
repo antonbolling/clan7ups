@@ -12,9 +12,11 @@ sub ups_stats_gui {
 
 		print <<EOT;
 		<h3>UPS Stats</h3>
+		<table border="1" cellpadding="5">
 EOT
     print ups_points_stats($dbh);
 		print ups_runs_stats($dbh);
+		print "</table>";
 
 		return_main2($session_info);
 }
@@ -40,18 +42,18 @@ sub ups_points_stats {
 				$total_points += $user_total_points;
 		}
 
-		$html .= "Total points in system: $total_points<br>";
+		$html .= "<tr><td>Total UPS points for all players:</td><td>$total_points</td></tr>";
 
 		my $total_bids_sql = $dbh->prepare("select sum(bid) from bid_eq where status = 'bidding'");
 		$total_bids_sql->execute;
 		
 		my ($total_bids) = $total_bids_sql->fetchrow_array;
 
-		$html .= "Total outstanding bids: $total_bids<br>";
+		$html .= "<tr><td>Total points tied up in bids:</td><td>$total_bids</td></tr>";
 
 		my $total_points_banked = $total_points - $total_bids;
 
-		$html .= "Total points banked (total - bid): $total_points_banked<br>";
+		$html .= "<tr><td>Total points banked (total - bid):</td><td>$total_points_banked</td></tr>";
 
 		return $html;
 }
@@ -66,7 +68,7 @@ sub ups_runs_stats {
 		
 		my ($number_of_runs) = $number_of_runs_sql->fetchrow_array;
 
-		$html .= "Number of approved runs: $number_of_runs<br>";
+		$html .= "<tr><td>Number of approved runs:</td><td>$number_of_runs</td></tr>";
 
 		return $html;
 }

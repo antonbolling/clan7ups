@@ -227,6 +227,14 @@ sub select_action {
   my ($dbh, $q, $view_time) = @_;
   my $session_info = get_session_info($dbh, $q, $view_time);
 
+  print "<table cellpadding=5><tr>";
+  print "<td>" . action_button($session_info, "create_run_gui", "Submit a run") . "</td>";
+  print "<td>" . action_button($session_info, "user_info_gui", "Modify your user info") . "</td>";
+  print "<td>" . action_button($session_info, "recent_runs_gui", "View recent runs") . "</td>";
+  print "<td>" . action_button($session_info, "user_transfer_points_gui", "Transfer points to another user") . "</td>";
+  print "<td>" . action_button($session_info, "ups_stats_gui", "View ups stats") . "</td>";
+	print "</tr></table>";
+
   print <<EOT;
 <form name=action method="post" action="/cgi-bin/ups.pl">
 $session_info

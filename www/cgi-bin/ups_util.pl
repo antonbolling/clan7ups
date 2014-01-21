@@ -37,4 +37,19 @@ EOT
   return 0;
 }
 
+
+# Creates a form with one button to run the specified ups action
+sub action_button {
+		my ($session_info, $action, $label) = @_;
+		
+		my $html = <<EOT;
+		<form method="post" action="/cgi-bin/ups.pl">
+				<input type="submit" value="$label">
+				<input type="hidden" name="action" value="$action">
+				$session_info
+		</form>
+EOT
+    return $html;
+}
+
 1;

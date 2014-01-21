@@ -42,7 +42,7 @@ sub refresh_session {
 
 #  print "<p>FOUND magic, elapsed: $db_magic, $elapsed</p>\n";
 
-  if (($db_magic == $cgi_magic) and ($elapsed < $session_timeout)) {
+  if (defined $cgi_magic && defined $uid && ($db_magic == $cgi_magic) and ($elapsed < $session_timeout)) {
     # Set a new session timestamp, update magic.
     my $new_magic = int rand(2147483648);
     my $sql = $dbh->prepare("update users set session_stamp=now(), magic=? where id=?");

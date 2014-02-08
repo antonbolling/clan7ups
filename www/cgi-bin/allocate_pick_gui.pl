@@ -110,7 +110,7 @@ EOT
   my $count = 0;
   foreach $item (@$data) {
     my ($zone_name, $points) = @$item;
-    my $avail = zone_highest_alloc($dbh, $q, $view_time, $zone_name);
+    my $avail = zone_highest_alloc($dbh, $login, $zone_name);
 
     #if ($zone_name ne 'scales') {
       $count++;

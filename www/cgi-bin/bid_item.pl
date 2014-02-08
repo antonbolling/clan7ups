@@ -101,7 +101,7 @@ EOT
   }
 
   # What is this user's max upbid?
-  my $max_upbid = zone_highest_bid($dbh, $q, $view_time, $zone);
+  my $max_upbid = zone_highest_bid($dbh, $login, $zone);
   if ($min_upbid > $max_upbid) {
     print <<EOT;
     <p>ERROR: Oops, looks like you're out of luck. You don't have enough points to bid on this item!

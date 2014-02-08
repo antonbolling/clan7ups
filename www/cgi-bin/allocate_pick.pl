@@ -117,7 +117,7 @@ EOT
 
   foreach $item (@$data) {
     my ($zone_name, $points) = @$item;
-    my $avail = zone_highest_alloc($dbh, $q, $view_time, $zone_name);
+    my $avail = zone_highest_alloc($dbh, $login, $zone_name);
 
     # Check if this zone is in param.
     my $this_zone_alloc = cook_int($q->param($zone_name));

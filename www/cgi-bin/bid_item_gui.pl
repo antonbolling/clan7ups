@@ -100,7 +100,7 @@ EOT
     $min_upbid = $int_upbid;
   }
 
-  my $max_upbid = zone_highest_bid($dbh, $q, $view_time, $zone);
+  my $max_upbid = zone_highest_bid($dbh, $login, $zone);
 
   print <<EOT;
   <ul>

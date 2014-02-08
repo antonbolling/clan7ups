@@ -132,7 +132,7 @@ EOT
 
     # For display purposes we need info for: maximum allowable bid by zone,
     # accounting for all of this user's points that are currently tied up in bids and claims.
-      my $zone_highest_bid = all_zone_highest_bid($dbh, $q, $view_time);
+      my $zone_highest_bid = all_zone_highest_bid($dbh, $admin_name);
 
       my $count = 0;
       my $style;
@@ -234,7 +234,7 @@ EOT
   browser_gui($dbh, $q, $view_time);
   return_main($dbh, $q, $view_time);
 
-  display_points($dbh, $q, $view_time);
+  display_points($dbh, $admin_name);
 }
 
 1;

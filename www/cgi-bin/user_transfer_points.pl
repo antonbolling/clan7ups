@@ -60,7 +60,7 @@ sub user_transfer_points {
 					next;
 			}
 
-      my $user_points_available = zone_highest_price($dbh, $q, $view_time, $zone_name);
+      my $user_points_available = zone_highest_price($dbh, $user_name, $zone_name);
 			if ($points_to_send > $user_points_available) {
 					print "Skipping points transfer for $zone_name, you tried to send $points_to_send points (only $user_points_available available)<br>";
 					next;
@@ -155,8 +155,8 @@ EOT
       my $zone_name = $entry->[0];
       my $points = $entry->[1];
     
-      my $avail = zone_highest_price($dbh, $q, $view_time, $zone_name);
-      my $high_bid = zone_highest_bid($dbh, $q, $view_time, $zone_name);
+      my $avail = zone_highest_price($dbh, $user_name, $zone_name);
+      my $high_bid = zone_highest_bid($dbh, $user_name, $zone_name);
         
       print <<EOT;
         <td>$zone_name</td>

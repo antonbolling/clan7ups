@@ -77,7 +77,7 @@ EOT
   # THREE: Display the browser.
   browser_gui($dbh, $q, $view_time);
 
-  display_points($dbh, $q, $view_time);
+  display_points($dbh, $login);
 
   print <<EOT;
   <form name=return method=post action="/cgi-bin/ups.pl">

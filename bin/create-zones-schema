@@ -92,7 +92,7 @@ ZONES << simple_zone("den",0.5)
 ZONES << simple_zone("reclasta",0.75)
 ZONES << simple_zone("sevoseth",1)
 ZONES << simple_zone("dlujik",0.5)
-ZONES << simple_zone("pallens",0.17)
+ZONES << simple_zone("pallens",0.5)
 
 ZONES << begin
            undead = Zone.new 'undeadforest', DEFAULT_PERCENT

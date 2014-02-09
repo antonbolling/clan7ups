@@ -17,6 +17,7 @@ CREATE TABLE bid_eq (
   min_bid int(11) default NULL,
   bidder varchar(20) default NULL,
   bid int(11) default NULL,
+  auto_max_upbid int(11) default NULL,
   status enum('added','bidding','picked','sent') default NULL,
   cur_bid_time datetime default NULL,
   prev_bid_time datetime default NULL,

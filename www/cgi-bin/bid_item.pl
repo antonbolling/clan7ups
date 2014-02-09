@@ -47,14 +47,14 @@ EOT
     return 1;
   }
 
-  $sth = $dbh->prepare("select zone, descr, min_bid, bidder, bid, UNIX_TIMESTAMP(cur_bid_time), UNIX_TIMESTAMP(first_bid_time), UNIX_TIMESTAMP(add_time) from bid_eq where id=$bid_item_num");
-  $sth->execute;
+  $sth = $dbh->prepare("select zone, descr, min_bid, bidder, bid, auto_max_upbid, UNIX_TIMESTAMP(cur_bid_time), UNIX_TIMESTAMP(first_bid_time), UNIX_TIMESTAMP(add_time) from bid_eq where id=?");
+  $sth->execute($bid_item_num);
 
   my $matches = $sth->rows;
 
   print "<p>$matches matches</p>";
 
-  my ($zone, $descr, $min_bid, $current_bidder, $current_bid, $cur_bid_time, $first_bid_time, $add_time) =
+  my ($zone, $descr, $min_bid, $current_bidder, $current_bid, $current_auto_max_upbid, $cur_bid_time, $first_bid_time, $add_time) =
      $sth->fetchrow_array;
 
   if (!$matches) {
@@ -116,6 +116,25 @@ EOT
     # If they bid more than min_upbid update the entry,
     # otherwise loop back into bid_item_gui with an error about bid must be at least blah.
     my $bid = cook_int($q->param('bid'));
+		my $auto_max_upbid = cook_int($q->param('auto_max_upbid'));
+
+		my $original_auto_max_upbid = $auto_max_upbid; # cache the original value, as it will be saved to the database if $login is successful in winning this bid
+
+		if ($auto_max_upbid and $auto_max_upbid > $max_upbid) {
+				# Don't permit auto_max_upbid to exceed max_upbid, ensuring that auto_max_upbid is itself a valid bid
+				$auto_max_upbid = $max_upbid;
+		}
+
+		my $incumbent_max_upbid = undef;
+
+		if ($current_bidder) {
+				my $incumbent_max_upbid = $current_bid + zone_highest_bid($dbh, $current_bidder, $zone); # current_bidder's current_bid points are tied up and not counted in zone_highest_bid, so add them in
+				if ($current_auto_max_upbid and $current_auto_max_upbid > $incumbent_max_upbid) {
+						# limit the current bidder's auto_max_upbid to their maximum bid for this zone,
+						# ensuring that current_auto_max_upbid is itself a valid bid
+						$current_auto_max_upbid = $incumbent_max_upbid;
+				}
+		}
 
     if (!$bid or $bid < $min_upbid) {
       print <<EOT;
@@ -124,35 +143,82 @@ EOT
 
       bid_item_gui($dbh, $q, $view_time);
       return 1;
-    } elsif ($bid > $max_upbid) {
+    } elsif ( $auto_max_upbid and $auto_max_upbid <= $bid) {
+				print <<EOT;
+				<p>ERROR: Your automatic max upbid of $auto_max_upbid must be greater than your bid of $bid. Please set the automatic max upbid higher.</p>
+EOT
+        bid_item_gui($dbh, $q, $view_time);
+				return 1;
+		} elsif ($bid > $max_upbid) {
 				print <<EOT;
 				<p>ERROR: Your bid of $bid exceeds your max upbid of $max_upbid. Please bid lower.</p>
 EOT
         bid_item_gui($dbh, $q, $view_time);
 				return 1;
+		} elsif ($current_bidder and $current_auto_max_upbid and !$auto_max_upbid and $bid <= $current_auto_max_upbid) {
+				do_auto_max_upbid($dbh, $current_bidder, $bid_item_num, $descr, $current_bid, $bid );
+				print <<EOT;
+				<p>ERROR: Your bid was lower than the current bidder\'s automatic max upbid. The current bidder was forced to match your bid of $bid. Please bid higher.</p>
+EOT
+        bid_item_gui($dbh, $q, $view_time);
+				return 1;
+		} elsif ($current_bidder and $current_auto_max_upbid and $auto_max_upbid and $bid <= $current_auto_max_upbid and $auto_max_upbid <= $current_auto_max_upbid) {
+				do_auto_max_upbid($dbh, $current_bidder, $bid_item_num, $descr, $current_bid, $auto_max_upbid);
+				print <<EOT;
+				<p>ERROR: Your automatic max upbid was lower than the current bidder\'s automatic max upbid. The current bidder was forced to match your automatic max upbid of $auto_max_upbid. Please bid higher.</p>
+EOT
+        bid_item_gui($dbh, $q, $view_time);
+				return 1;
 		} else {
+				if ($current_bidder and $current_auto_max_upbid and $auto_max_upbid and $bid <= $current_auto_max_upbid && $auto_max_upbid > $current_auto_max_upbid) {
+						$bid = $current_auto_max_upbid + 1;
+						print <<EOT;
+						<p>NOTE: Your bid was increased to $bid to exceed the old bidder\'s automatic max upbid. Your auto max upbid is still $original_auto_max_upbid.</p>
+EOT
+				}
+
       print <<EOT;
       <p> SUCCESS: Placing a bid of $bid points on item $bid_item_num, $descr.
           Returning to the main menu.</p>
 EOT
 
       #Log this bid
-      $dbh->do("insert into log (user,action,idata1,bigdata) values($uid,'bid',$bid_item_num,'$login bid $bid on item $bid_item_num')");
+      my $auto_max_upbid_string = $original_auto_max_upbid ? $original_auto_max_upbid : "";
+      my $log_msg = "$login bid $bid (auto_max_upbid $auto_max_upbid_string) on item $bid_item_num";
+      my $sth = $dbh->prepare("insert into log (user,action,idata1,bigdata) values(?,'bid',?,?)");
+			$sth->execute($uid,$bid_item_num,$log_msg);
 
-      $dbh->do("update bid_eq set bid=$bid, bidder='$login', status='bidding', cur_bid_time=now() where id=$bid_item_num");
+			$sth = $dbh->prepare("update bid_eq set bid=?, auto_max_upbid=?, bidder=?, status='bidding', cur_bid_time=now() where id=?");
+			$sth->execute($bid,$original_auto_max_upbid,$login,$bid_item_num);
 
 			if ($first_bid_time) {
 					create_outbid_notification($dbh, $current_bidder, $bid_item_num, $descr, $current_bid, $bid);
 			}
 
       if (!$first_bid_time) {
-        $dbh->do("update bid_eq set first_bid_time=now() where id=$bid_item_num");
+					$sth = $dbh->prepare("update bid_eq set first_bid_time=now() where id=?");
+					$sth->execute($bid_item_num);
       }
 
       main_menu($dbh, $q, $view_time);
       return 1;
     }
   }
+}
+
+# When executing an automatic upbid, update only the current bid on an item
+# No modifications to timers, current bidder, auto max upbid, etc.
+sub do_auto_max_upbid {
+		my ($dbh, $current_bidder, $bid_item_num, $descr, $old_bid, $new_bid) = @_;
+		my $sth = $dbh->prepare("update bid_eq set bid=? where id=?");
+		$sth->execute($new_bid,$bid_item_num);
+		create_auto_upbid_notification($dbh, $current_bidder, $bid_item_num, $descr, $old_bid, $new_bid);
+}
+
+sub create_auto_upbid_notification {
+		my ($dbh, $current_bidder, $bid_item_num, $descr, $old_bid, $new_bid) = @_;
+		my $notification = "<form>auto upbid on ID $bid_item_num, your bid increased from $old_bid to $new_bid, $descr";
+		create_notification_by_user_name($dbh, $current_bidder, $notification);
 }
 
 sub create_outbid_notification {

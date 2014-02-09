@@ -13,6 +13,7 @@ require "points.pl";
 require "cook.pl";
 require "time_string.pl";
 require "auction_timing.pl";
+require "ups_util.pl";
 
 # Display:
 # -- All equipment this user can pick with links to the allocate script.
@@ -55,6 +56,8 @@ sub main_menu {
 
 EOT
 
+  return_main2($session_info, "Refresh");
+
   # All levels: Select a non-main-menu action.
   select_action($dbh, $q, $view_time);
 
@@ -79,14 +82,7 @@ EOT
 
   display_points($dbh, $login);
 
-  print <<EOT;
-  <form name=return method=post action="/cgi-bin/ups.pl">
-  $session_info
-  <input type="hidden" name="action" value="main_menu">
-  <input type="submit" value="Refresh this page">
-  </form>
-EOT
-
+	return_main2($session_info, "Refresh");
 }
 
 sub list_runs_user {
@@ -277,7 +273,7 @@ EOT
 sub display_notifications {
   my ($dbh, $session_info, $uid) = @_;
 
-	my $notifications_sql = $dbh->prepare("select id, notification from user_notifications where user_id = ?");
+	my $notifications_sql = $dbh->prepare("select id, notification from user_notifications where user_id = ? ORDER BY id DESC");
   $notifications_sql->execute($uid);
 
   my $at_least_one_notification = 0;
@@ -361,33 +357,48 @@ EOT
     if ($num_waiting) {
       print <<EOT;
       <h4> Bids waiting on a timer: $num_waiting </h4>
-      <table>
-      <tr><td>ID</td><td>Bid</td><td>Description</td><td>Timer</td></tr>
+			TIP! Sort multiple columns simultaneously by holding down the shift key and clicking a second, third or even fourth column header!<br>
+		  <table id="currentBids" class="tablesorter">
+			  <thead>
+				  <tr><th>Id</th><th>Bid</th><th>Auto max upbid</th><th>Description</th><th>Timer</th></tr>
+				</thead>
+				<tbody>
 EOT
 
       my $in_list = join ',', @waiting_bids;
 
-      $sth = $dbh->prepare("select id,bid,descr,UNIX_TIMESTAMP(add_time),UNIX_TIMESTAMP(cur_bid_time) from bid_eq where id in ($in_list) order by cur_bid_time");
+      $sth = $dbh->prepare("select id,bid,auto_max_upbid,descr,UNIX_TIMESTAMP(add_time),UNIX_TIMESTAMP(cur_bid_time) from bid_eq where id in ($in_list) order by cur_bid_time");
       $sth->execute;
       $data = $sth->fetchall_arrayref;
 
       foreach $item (@$data) {
-        my ($eqid, $bid, $descr, $add_time, $cur_bid_time) = @$item;
+        my ($eqid, $bid, $auto_max_upbid, $descr, $add_time, $cur_bid_time) = @$item;
+        $auto_max_upbid = $auto_max_upbid ? $auto_max_upbid : "";
 
 				my $timer = time_string(auction_seconds_remaining($view_time,$add_time,$cur_bid_time));
 
-        print <<EOT
+        print <<EOT;
         <tr>
-        <td>$eqid</td><td>$bid</td>
+        <td>$eqid</td>
+				<td>$bid</td>
+				<td>$auto_max_upbid</td>
         <td>$descr</td>
         <td>$timer</td>
         </tr>
-
 EOT
       }
 
-    print "</table>\n";
-
+			print <<EOT;
+				</tbody></table>
+				<script type='text/javascript'>
+				\$(function() {
+						\$('#currentBids').tablesorter({ 
+								sortList: [[4,0]], // sort fifth column ascending
+	    					widgets: ['zebra']
+						 });
+					 });
+		</script>
+EOT
     }
 
 
@@ -400,7 +411,7 @@ EOT
       $session_info
 
       <table>
-      <tr><td>Pick</td><td>ID</td><td>Bid</td><td>Description</td></tr>
+      <tr><td>Pick</td><td>Id</td><td>Bid</td><td>Description</td></tr>
 EOT
 
       my $in_list = join ',', @pickable_bids;

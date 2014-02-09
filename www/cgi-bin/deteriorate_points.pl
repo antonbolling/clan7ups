@@ -71,7 +71,7 @@ sub points_det_for_one_user {
 		$sth->execute;
 
 		my $final_det_percent_rounded = (int (100000 * (1.0 - $final_det_multiplier))) / 1000.0;
-		my $notification = "Everyone's points deteriorated by $final_det_percent_rounded%. (sorry for spammy notification)";
+		my $notification = "<form>Everyone's points deteriorated by $final_det_percent_rounded%. (sorry for spammy notification)";
 		create_notification_by_user_name($dbh, $user_name, $notification);
 
 		print STDERR "det'd points for $user_name\n"

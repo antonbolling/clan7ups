@@ -131,6 +131,7 @@ EOT
     <input type="hidden" name="bid_item" value="$bid_item_num">
     $session_info
     <p>Your bid on this item: <input type="text" name="bid"></p>
+    <p>Your automatic max upbid on this item (optional): <input type="text" name="auto_max_upbid"></p>
     <input type="submit" value="Place this bid">
     </form>
 EOT

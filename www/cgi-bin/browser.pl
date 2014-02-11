@@ -218,7 +218,7 @@ EOT
 			</form>
 			<script type='text/javascript'>
 				\$(function() {
-						\$('#eqBrowser').tablesorter();
+						\$('#eqBrowser').tablesorter({ headers:{ 8: { sorter:'upstimer'}, 9: { sorter:'upstimer'}}});
 					 });
 		</script>
 

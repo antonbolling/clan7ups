@@ -95,24 +95,29 @@ sub browser {
 EOT
       return_main($dbh, $q, $view_time);
 		 	print <<EOT;
+			TIP! Sort by "Timer" to see auctions ending soon. Sort multiple columns simultaneously by holding down the shift key and clicking a second, third or even fourth column header!<br>
+<form method="post" name="bid_eq" action="/cgi-bin/ups.pl">
+$session_info
+<input type="hidden" name="action" value="bid_item_gui">
 <table border=0 width=100% cellpadding=0 cellspacing=1 bgcolor=cccccc>
-<tr>
-<td>
-  <table border=0 cellpadding=3 cellspacing=1 width='100%'>
+  <tr><td>
+	<input type="submit" value="Bid on selected item">
+  </td><tr>
+  <tr><td>
+  <table id=eqBrowser border=0 cellpadding=3 cellspacing=1 width='100%'>
 
-  <form method="post" name="bid_eq" action="/cgi-bin/ups.pl">
-  $session_info
-  <input type="hidden" name="action" value="bid_item_gui">
-
+	
+	<thead>
   <tr id="bid_header">
-    <td>Bid</td><td>Id</td><td>Zone</td><td>Desc</td>
-    <td id="browser_minbid">M</td>
-    <td id="browser_curbid">A</td>
-    <td id="browser_minupb">U</td>
-    <td id="browser_maxupb">X</td>
-    <td>Timer</td>
-    <td>Age</td>
+    <th>Bid</th><th>Id</th><th>Zone</th><th>Desc</th>
+    <th id="browser_minbid">M</th>
+    <th id="browser_curbid">A</th>
+    <th id="browser_minupb">U</th>
+    <th id="browser_maxupb">X</th>
+    <th>Timer</th>
+    <th>Age</th>
   </tr>
+	</thead>
 EOT
 
       my $in_list = join ',', @biddable_eq;
@@ -207,13 +212,15 @@ EOT
       }
 
       print <<EOT;
+      </table></td></tr>
+			<tr><td><input type="submit" value="Bid on selected item"></td></tr>
       </table>
-      <input type="submit" value="Bid on selected item">
-      </form>
-
-      </td>
-      </tr>
-      </table>
+			</form>
+			<script type='text/javascript'>
+				\$(function() {
+						\$('#eqBrowser').tablesorter();
+					 });
+		</script>
 
       <h4>Column key</h4>
       <ul>

@@ -35,6 +35,7 @@ print <<EOT;
 <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="/js/garlic-1.2.2.min.js"></script>
 <script src="/js/jquery.tablesorter.min.js"></script>
+<script src="/js/tablesorter-timer-parser.js"></script>
 EOT
 
 print_styles();

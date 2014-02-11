@@ -143,7 +143,7 @@ EOT
 
       bid_item_gui($dbh, $q, $view_time);
       return 1;
-    } elsif ( $auto_max_upbid and $auto_max_upbid <= $bid) {
+    } elsif ( !$auto_max_upbid or $auto_max_upbid <= $bid) {
 				print <<EOT;
 				<p>ERROR: Your automatic max upbid of $auto_max_upbid must be greater than your bid of $bid. Please set the automatic max upbid higher.</p>
 EOT

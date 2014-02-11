@@ -125,13 +125,15 @@ EOT
     return 1;
   }
   else {
+			my $default_bid = $min_upbid && $min_upbid > 0 ? $min_upbid : 1;
     print <<EOT;
     <form name="picks" method="post" action="/cgi-bin/ups.pl">
     <input type="hidden" name="action" value="bid_item">
     <input type="hidden" name="bid_item" value="$bid_item_num">
     $session_info
-    <p>Your bid on this item: <input type="text" name="bid"></p>
-    <p>Your automatic max upbid on this item (optional): <input type="text" name="auto_max_upbid"></p>
+    <p>Your bid on this item: <input style="background: #E7E7E7;" type="text" name="bid" value="$default_bid" readonly></p>
+		<h2><p><span style="background:yellow;">NEW!!</span> Set your high bid!  UPS automatically upbids this item for you.</p><p>Your max on this item: $max_upbid</p></h2>
+    <p>Your high bid on this item: <input type="text" name="auto_max_upbid" autofocus> <i>Suggestion: Don't lowball. You probably won't end up spending this amount of points. Put a high number that you'd actually pay for this item. You'll win more items, faster!!</p>
     <input type="submit" value="Place this bid">
     </form>
 EOT

@@ -360,7 +360,7 @@ EOT
 			TIP! Sort multiple columns simultaneously by holding down the shift key and clicking a second, third or even fourth column header!<br>
 		  <table id="currentBids" class="tablesorter">
 			  <thead>
-				  <tr><th>Id</th><th>Bid</th><th>Auto max upbid</th><th>Description</th><th>Timer</th></tr>
+				  <tr><th>Id</th><th>Your Current Bid</th><th>Your High Bid</th><th>Description</th><th>Timer</th></tr>
 				</thead>
 				<tbody>
 EOT

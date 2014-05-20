@@ -12,6 +12,23 @@ require "ups_util.pl";
 require "main_menu.pl";
 require "time_string.pl";
 
+sub pending_picks_summary {
+		my ($dbh, $session_info) = @_;
+
+		my $sth = $dbh->prepare("select UNIX_TIMESTAMP(now()) - UNIX_TIMESTAMP(add_stamp) as age from outgoing_eq order by add_stamp");
+		$sth->execute;
+
+		my $matches = $sth->rows;
+
+		if (!$matches) {
+				return "";
+		}
+
+		my ($oldest_age) = time_string($sth->fetchrow_array);
+
+		return "<table><tr><td><h3>You should send picks out. $matches items waiting to be sent since $oldest_age </td><td>". action_button($session_info, "perform_picks_gui", "Perform picks") . "</td></tr></table></h3>";
+}
+
 sub perform_picks_gui {
   my ($dbh, $q, $view_time) = @_;
 

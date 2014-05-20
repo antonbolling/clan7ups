@@ -14,6 +14,7 @@ require "cook.pl";
 require "time_string.pl";
 require "auction_timing.pl";
 require "ups_util.pl";
+require "perform_picks_gui.pl";
 
 # Display:
 # -- All equipment this user can pick with links to the allocate script.
@@ -63,6 +64,7 @@ EOT
 
   # Gatekeeper? Check for 'pending' status runs.
   if ($access eq 'gate' or $access eq 'admin') {
+		print pending_picks_summary($dbh, $session_info);
     list_runs_gate($dbh, $q, $view_time);
   }
 

@@ -7,6 +7,7 @@ use DBI;
 require "ups_config.pl";
 require "time_string.pl";
 require "user_notifications.pl";
+require "free_points.pl"; # not a dependency for deteriorate_points, just used here as a convenient hook for free points
 
 # Go through the database and deteriorate points for all users, based on the
 # deterioration rates in config and time of last det.
@@ -35,6 +36,10 @@ sub deteriorate_points {
 				$sth = $dbh->prepare("insert into points_deteriorate_log (points_deteriorate_timestamp,deteriorate_halflife_days,deteriorate_frequency_minutes,det_rate_for_period,periods_since_last_det) values (now(),?,?,?,?)");
 				$sth->execute($det_halflife_days,$det_frequency_minutes,$det_rate_for_period,$periods_since_last_det);
 				end_transaction($dbh);
+
+				# NOTE - free_points_in_each_zone_for_all_users has nothing to do with deteriorate_points
+				# this is a convenient hook to give free points before det'ing points
+				free_points_in_each_zone_for_all_users($dbh);
 		}
 }
 

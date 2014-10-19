@@ -17,11 +17,22 @@ sub auction_pickable {
 # A return value <= 0 indicates the auction is over and the item may be picked
 # If the auction has no current bid, the maximum auction length will be returned
 sub auction_seconds_remaining {
-		my ($current_time, $add_time, $current_bid_time) = @_;
+		my ($current_time, $add_time, $current_bid_time, $first_bid_time) = @_;
 
 		if (! defined $current_bid_time) {
 				#print STDERR "auction_seconds_remaining received null current_bid_time, so returning the maximum auction legnth\n";
 				return $MINIMUM_AUCTION_DURATION_SECONDS;
+		}
+
+		if (defined $first_bid_time && defined $current_bid_time && $current_bid_time == $first_bid_time) {
+			#print STDERR "auction_seconds_remaining detected that this item has only been bid on once. If this auction is older than the minimum duration, it will be expired immediately since there is no competition for the item... ";
+			my $time_since_item_added = $current_time - $add_time;
+			if ($time_since_item_added > $MINIMUM_AUCTION_DURATION_SECONDS) {
+				#print STDERR "YES, expired. Auction was immediately ended. current_bid_time: $current_bid_time, first_bid_time: $first_bid_time, time_since_item_added: $time_since_item_added \n";
+				return -1;
+			} else {
+				#print STDERR "NO, not expired. Auction is too new and requires a chance at competition before expiring. current_bid_time: $current_bid_time, first_bid_time: $first_bid_time, time_since_item_added: $time_since_item_added \n";
+			}
 		}
 
 		my $upbid_end_time = $current_bid_time + $UPBID_DURATION_SECONDS;
@@ -31,7 +42,7 @@ sub auction_seconds_remaining {
 		
 		my $auction_seconds_remaining = $latest_end_time - $current_time;
 
-		#print STDERR "bid_seconds_remaining had add_time $add_time, cur_bid_time $current_bid_time, latest_end_time $latest_end_time, and seconds remaining $auction_seconds_remaining\n";
+		#print STDERR "bid_seconds_remaining had add_time $add_time, cur_bid_time $current_bid_time, first_bid_time $first_bid_time, latest_end_time $latest_end_time, and seconds remaining $auction_seconds_remaining\n";
 
 		return $auction_seconds_remaining;
 }
@@ -40,12 +51,12 @@ sub auction_seconds_remaining {
 sub get_auction_times {
 		my ($dbh, $bid_eq_id) = @_;
 
-		my $bid_item_sql = $dbh->prepare("select UNIX_TIMESTAMP(now()), UNIX_TIMESTAMP(add_time), UNIX_TIMESTAMP(cur_bid_time) from bid_eq where id = ?");
+		my $bid_item_sql = $dbh->prepare("select UNIX_TIMESTAMP(now()), UNIX_TIMESTAMP(add_time), UNIX_TIMESTAMP(cur_bid_time), UNIX_TIMESTAMP(first_bid_time) from bid_eq where id = ?");
 		$bid_item_sql->execute($bid_eq_id);
 
-		my ($current_time, $add_time, $current_bid_time) = $bid_item_sql->fetchrow_array;
+		my ($current_time, $add_time, $current_bid_time, $first_bid_time) = $bid_item_sql->fetchrow_array;
 		
-		return ($current_time, $add_time, $current_bid_time);
+		return ($current_time, $add_time, $current_bid_time, $first_bid_time);
 }
 
 1;

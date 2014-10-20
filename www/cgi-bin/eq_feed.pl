@@ -18,7 +18,7 @@ require "db.pl";
 
 my $dbh = get_db();
 
-my $EQ_NEWER_THAN_SECONDS = 60 * 24 * 7;
+my $EQ_NEWER_THAN_SECONDS = 60 * 60* 24 * 5;
 
 my $eq_filter = " WHERE (UNIX_TIMESTAMP(now()) - UNIX_TIMESTAMP(add_time)) < $EQ_NEWER_THAN_SECONDS && status != 'picked' ";
 
